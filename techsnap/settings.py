@@ -26,8 +26,9 @@ SECRET_KEY = 'django-insecure-55b-47mkye==&lk-vk!o3&0zzz8!thrc9d@%i^=wrtr#b!4$6&
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
-
+CORS_ALLOWED_ORIGINS = [
+    'https://techsnap-pe2v.onrender.com',
+]
 # Application definition
 
 INSTALLED_APPS = [
