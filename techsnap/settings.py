@@ -29,7 +29,7 @@ ALLOWED_HOSTS = ['*']
 CORS_ALLOWED_ORIGINS = [
     'https://techsnap-pe2v.onrender.com',
 ]
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://techsnap-pe2v.onrender.com']
 # Application definition
 
 INSTALLED_APPS = [
