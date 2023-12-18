@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feed Page</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logout-login-button {
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-button {
+            background-color: #e74c3c;
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .login-button {
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        .post {
+            border: 1px solid #ddd;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .post-header {
+            padding: 12px;
+            background-color: #3498db;
+            color: #fff;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .post-content {
+            padding: 12px;
+            color: #333;
+        }
+
+        .post-image {
+            max-width: 100%;
+            max-height: 200px; /* Adjusted maximum height for the image */
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .post-footer {
+            padding: 12px;
+            background-color: #ecf0f1;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .likes {
+            color: #e74c3c;
+        }
+
+        .timestamp {
+            color: #7f8c8d;
+        }
+
+        .like-button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .pagination {
+            display: none; /* Hide the pagination */
+        }
+
+        .loading {
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".like-button").on("click", function (e) {
+                e.preventDefault();
+
+                var postId = $(this).data("post-id");
+                var likeUrl = "{% url 'posts:Like_Post' %}?id=" + postId;
+
+                $.ajax({
+                    url: likeUrl,
+                    method: "GET",
+                    success: function (data) {
+                        if (data && data.Message === "Succesfull") {
+                            var likesElement = $("#likes-" + postId);
+                            $.get("{% url 'posts:Get_Likes' %}?id=" + postId, function (countData) {
+                                likesElement.text("Likes: " + countData.Likes);
+                            });
+                        } else {
+                            console.error("Invalid response format or likes not successful.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error occurred while processing the like.");
+                    }
+                });
+            });
+        });
+        $(document).ready(function () {
+            var loading = false;
+            var nextPageUrl = "{% url 'posts:Feed' %}?page=2"; // Initial next page URL
+    
+            function loadMorePosts() {
+                if (loading) return;
+    
+                loading = true;
+    
+                $(".loading").show();
+    
+                $.ajax({
+                    url: nextPageUrl,
+                    method: "GET",
+                    success: function (data) {
+                        $(".loading").hide();
+    
+                        if (data && data.results && data.results.length > 0) {
+                            for (var i = 0; i < data.results.length; i++) {
+                                var post = data.results[i];
+    
+                                // Create HTML for the new post
+                                var newPost = `
+                                    <div class="post">
+                                        <div class="post-header">
+                                            <strong>ID:</strong> ${post.id} | <strong>User:</strong> ${post.user}
+                                        </div>
+                                        <div class="post-content">
+                                            ${post.content}
+                                        </div>
+    
+                                        ${post.pic ? `<img class="post-image" src="${post.pic}" alt="Post Image">` : ''}
+    
+                                        <div class="post-footer">
+                                            <span id="likes-${post.id}" class="likes"><strong>Likes:</strong> ${post.like}</span> |
+                                            <span class="timestamp"><strong>Timestamp:</strong> ${post.timestamp}</span>
+                                            <a class="like-button" href="#" data-post-id="${post.id}">Like</a>
+                                        </div>
+                                    </div>
+                                `;
+    
+                                // Append the new post to the feed
+                                $("#post-container").append(newPost);
+                            }
+    
+                            // Update next page URL for the next set of posts
+                            nextPageUrl = data.next;
+                        } else {
+                            console.error("Invalid response format or no new posts.");
+                        }
+    
+                        loading = false;
+                    },
+                    error: function () {
+                        $(".loading").hide();
+                        alert("Error occurred while loading more posts.");
+                        loading = false;
+                    }
+                });
+            }
+    
+            // Load more posts when the user scrolls to the bottom
+            $(window).scroll(function () {
+                if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+                    loadMorePosts();
+                }
+            });
+    
+            // Initial load for the first page
+            loadMorePosts();
+        });
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>Feed</h1>
+        <div>
+            {% if user.is_authenticated %}
+                <a class="logout-login-button logout-button" href="{% url 'Authmodules:logout' %}">Logout</a>
+            {% else %}
+                <a class="logout-login-button login-button" href="{% url 'Authmodules:login' %}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="post-container">
+        {% for post in results.results %}
+            <div class="post">
+                <div class="post-header">
+                    <strong>ID:</strong> {{ post.id }} | <strong>User:</strong> {{ post.user }}
+                </div>
+                <div class="post-content">
+                    {{ post.content }}
+                </div>
+
+                {% if post.pic %}
+                    <img class="post-image" src="{{ post.pic }}" alt="Post Image">
+                {% endif %}
+
+                <div class="post-footer">
+                    <span id="likes-{{ post.id }}" class="likes"><strong>Likes:</strong> {{ post.like }}</span> |
+                    <span class="timestamp"><strong>Timestamp:</strong> {{ post.timestamp }}</span>
+                    <a class="like-button" href="#" data-post-id="{{ post.id }}">Like</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="loading" style="display: none;">Loading...</div>
+</body>
+</html>

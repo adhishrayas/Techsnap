@@ -32,7 +32,8 @@
             margin-bottom: 8px;
         }
 
-        input {
+        input,
+        textarea {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -42,12 +43,6 @@
         }
 
         textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
             resize: vertical;
         }
 
@@ -68,11 +63,15 @@
 <body>
     <div class="form-container">
         <h2>Create a Post</h2>
-        <form action="" method="post">
+        <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <!-- Content -->
             <label for="content">Content:</label>
             <textarea id="content" name="content" rows="4" required></textarea>
+
+            <!-- Image -->
+            <label for="pic">Image:</label>
+            <input type="file" id="pic" name="pic" accept="image/*">
 
             <button type="submit">Create Post</button>
         </form>

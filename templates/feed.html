@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Feed Page</title>
     <style>
         body {
@@ -62,6 +63,14 @@
             color: #333;
         }
 
+        .post-image {
+            max-width: 100%;
+            max-height: 200px; /* Adjusted maximum height for the image */
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
         .post-footer {
             padding: 12px;
             background-color: #ecf0f1;
@@ -118,6 +127,36 @@
             color: #fff;
         }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".like-button").on("click", function (e) {
+                e.preventDefault();
+    
+                var postId = $(this).data("post-id");
+                var likeUrl = "{% url 'posts:Like_Post' %}?id=" + postId;
+    
+                $.ajax({
+                    url: likeUrl,
+                    method: "GET",
+                    success: function (data) {
+                        if (data && data.Message === "Succesfull") {
+                            var likesElement = $("#likes-" + postId);
+                            $.get("{% url 'posts:Get_Likes' %}?id=" + postId, function (countData) {
+                                likesElement.text("Likes: " + countData.Likes);
+                            });
+                        } else {
+                            console.error("Invalid response format or likes not successful.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error occurred while processing the like.");
+                    }
+                });
+            });
+        });
+    </script>
+    
 </head>
 <body>
     <div class="header">
@@ -139,10 +178,15 @@
             <div class="post-content">
                 {{ post.content }}
             </div>
+
+            {% if post.pic %}
+                <img class="post-image" src="{{ post.pic }}" alt="Post Image">
+            {% endif %}
+
             <div class="post-footer">
-                <span class="likes"><strong>Likes:</strong> {{ post.like }}</span> |
+                <span id="likes-{{ post.id }}" class="likes"><strong>Likes:</strong> {{ post.like }}</span> |
                 <span class="timestamp"><strong>Timestamp:</strong> {{ post.timestamp }}</span>
-                <a class="like-button" href="{% url 'Like Post' %}?id={{ post.id }}">Like</a>
+                <a class="like-button" href="#" data-post-id="{{ post.id }}">Like</a>
             </div>
         </div>
     {% endfor %}

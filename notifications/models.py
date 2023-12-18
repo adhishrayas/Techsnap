@@ -11,6 +11,7 @@ class Notification(models.Model):
     )
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,null = True)
     content = models.TextField()
+    pic = models.ImageField(upload_to='posts/',null = True,blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
