@@ -1,10 +1,8 @@
 from django.urls import path
-from .views import CreateNotificationView,GetAllNotificationView,GetReadNotificationsView,GetUnreadNotificationsView,SeeNotificationView
+from .views import FeedView,PostLikeView,PostCreateView
 
 urlpatterns = [
-    path('create_notif/',CreateNotificationView.as_view(),name = "Create Notification"),
-    path('get_notifs/',GetAllNotificationView.as_view(),name = "Get all Notifications"),
-    path('get_read_notifs/',GetReadNotificationsView.as_view(),name = "Get all Read Notifications"),
-    path('get_unread_notifs/',GetUnreadNotificationsView.as_view(),name = "Get Unread Notifications"),
-    path('get_notif_details/',SeeNotificationView.as_view(),name = "Details of Notification")
+    path('feed',FeedView.as_view(),name = 'Feed'),
+    path('create_post',PostCreateView.as_view(),name = 'Post Create'),
+    path('Like_post',PostLikeView.as_view(),name = 'Like Post')
 ]

@@ -14,12 +14,18 @@ class SignUpView(GenericAPIView):
     serializer_class = SignUpSerializer
     permission_classes = (AllowAny,)
     queryset= CustomUser.objects.all()
-
+    def get(self, request, *args, **kwargs):
+        default_values = {
+            "username": "",
+            "email": "",
+            "phone": None,
+        }
+        return render(request, 'signup.html', default_values)
     def post(self,request,*args, **kwargs):
         if CustomUser.objects.filter(email = request.data.get('email')).exists():
-            return Response({"message":"Account with this email already exists"},status = status.HTTP_400_BAD_REQUEST)
+            return render(request, 'account_exists.html')
         if CustomUser.objects.filter(username = request.data.get('username')).exists():
-            return Response({"message":"This username is taken"},status = status.HTTP_400_BAD_REQUEST)
+            return render(request, 'username_taken.html')
         serializer = SignUpSerializer(data = request.data)
         serializer.is_valid()
         serializer.save()
@@ -28,11 +34,11 @@ class SignUpView(GenericAPIView):
           token = Token.objects.create(user = user)
         except:
             user.delete()
-            return Response({"message":"Unable to create user"},status = status.HTTP_400_BAD_REQUEST)
+            return render(request, 'unable_to_create_user.html')
         login(request,user)
         token = Token.objects.get(user = user)
         user_data = SignUpSerializer(user)
-        return Response({"message":"Account created succesfully !","token":token.key,"user_info":user_data.data},status = status.HTTP_201_CREATED)
+        return render(request, 'account_created.html',user_data.data)
     
 
 class LoginView(GenericAPIView):
@@ -40,6 +46,8 @@ class LoginView(GenericAPIView):
     permission_classes = (AllowAny,)
     queryset = CustomUser.objects.all()
 
+    def get(self, request, *args, **kwargs):
+        return render(request, 'login.html', {'email': '', 'password': ''})
     def post(self,request,*args, **kwargs):
         try:
             user = CustomUser.objects.get(email = request.data.get('email'))
@@ -47,11 +55,17 @@ class LoginView(GenericAPIView):
                 token,_ = Token.objects.get_or_create(user = user)
                 login(request,user)
                 user_data = SignUpSerializer(user)
-                return Response({"message":"Logged in Succesfully","token":token.key,"user_data":user_data.data},status = status.HTTP_200_OK)
+                payload = {
+                    "message": "Logged in Successfully",
+                    "token": token.key,
+                    "user_data": user_data.data
+                }
+                # Render the success template with the payload data
+                return render(request, 'loginsuccess.html', payload)
             else:
-                return Response({"message":"Please use correct credentials"},status = status.HTTP_400_BAD_REQUEST)
+                return render(request, 'incorrect_credentials.html')
         except:
-            return Response({"message":"User not found"},status = status.HTTP_404_NOT_FOUND)
+                return render(request, 'user_not_found.html')
 
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -60,14 +74,15 @@ class LogoutView(APIView):
         user = self.request.user
         token = Token.objects.get(user = user)
         logout(request)
-        token.delete()
-        return Response({"message":"Logged out succesfully"},status = status.HTTP_200_OK)
+        message = "Logged out successfully"
+        return render(request, 'logout_view.html', {'message': message})
       except:
-        return Response({"message":"Unable to log out"},status = status.HTTP_400_BAD_REQUEST)
+        message = "Unable to log out"
+        return render(request, 'logout_view.html', {'message': message})
 
 
-
-            
+def success_view(request):
+    return render(request, 'success.html')   
         
 
 

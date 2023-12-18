@@ -1,93 +1,84 @@
-from django.shortcuts import render
-from django.utils import timezone
+from django.shortcuts import render,redirect
+from django.template.response import TemplateResponse
+from rest_framework.generics import ListAPIView,CreateAPIView,RetrieveAPIView,GenericAPIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import BasePermission,IsAuthenticated
-from .models import Notification
-from .serializers import CreateNotificationSerializer,GetNotificationSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
+from .serializers import PostSerializer
+from .models import Notification,Likes
 
-# Create your views here.
+class PostPagination(PageNumberPagination):
+    page_size = 10  
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    def get_paginated_data(self, serializer_class, data):
+        page_number = self.page.number
+        total_pages = self.page.paginator.num_pages
 
-class SuperUserAuthenticationPermission(BasePermission):
+        serialized_data = serializer_class(data['results'], many=True).data
 
-    def has_permission(self,request,view):
-        user = request.user
-        if user and user.is_authenticated:
-            return user.is_superuser
-        return False
+        paginated_data = {
+            'count': data['count'],
+            'next': data['next'],
+            'previous': data['previous'],
+            'results': serialized_data,
+            'page_number': page_number,
+            'total_pages': total_pages,
+        }
+
+        return paginated_data
+    
+class FeedView(ListAPIView):
+    serializer_class = PostSerializer
+    pagination_class = PostPagination
+    permission_classes = (IsAuthenticated,)
+    queryset = Notification.objects.all()
+    
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        return render(request, 'feed.html', {'results': response.data})
         
-class CreateNotificationView(GenericAPIView):
-    serializer_class = CreateNotificationSerializer
-    permission_classes = (IsAuthenticated,SuperUserAuthenticationPermission)
+'''
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        template_name = 'feed.html'
+        paginator = self.paginator
+        serializer_class = self.serializer_class
+        paginated_data = paginator.get_paginated_data(serializer_class, response.data)
+        response.data['paginated_data'] = paginated_data
+        return render(request, template_name, response.data)
+'''
+class PostCreateView(CreateAPIView):
+    serializer_class = PostSerializer
+    permission_classes = (IsAuthenticated,)
     queryset = Notification.objects.all()
 
-    def post(self,request,*args, **kwargs):
-      try:
-        mutabale_data = request.data.copy()
-        mutabale_data['sent_by'] = self.request.user.id
-        serializer = CreateNotificationSerializer(data = mutabale_data)
-        serializer.is_valid()
-        serializer.save(sent_by=self.request.user)
-        message = serializer.instance
-        message_data = CreateNotificationSerializer(message)
-        return Response({"message":"Notification has been sent","Data":message_data.data},status = status.HTTP_201_CREATED)
-      except:
-        return Response({"message":"Something went wrong"},status = status.HTTP_400_BAD_REQUEST)
+    def get(self, request, *args, **kwargs):
+        return render(request, 'create_post.html')
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
 
-class GetAllNotificationView(GenericAPIView):
-   serializer_class = GetNotificationSerializer
-   permission_classes = (IsAuthenticated,)
+        # Assuming you have a template named 'post_created.html'
+        post_data = PostSerializer(serializer.instance).data
+        return render(request, 'post_created.html', {'post': post_data})
+    def perform_create(self,serializer):
+        post = serializer.save(user = self.request.user)
+        
+class PostLikeView(APIView):
+    permission_classes = (IsAuthenticated,)
 
-   def get(self,request,*args, **kwargs):
-      data = []
-      one_week_ago = timezone.now() - timezone.timedelta(days=7)
-      Notifications = Notification.objects.filter(user = self.request.user).filter(timestamp__range=[one_week_ago,timezone.now()])
-      for n in Notifications:
-         serializer = GetNotificationSerializer(n)
-         data.append(serializer.data)
-      message_data = data[::-1]
-      return Response({"message":"Here are all your notifications from the last week!","data":message_data},status = status.HTTP_200_OK)
-
-class GetReadNotificationsView(GenericAPIView):
-   serializer_class = GetNotificationSerializer
-   permission_classes = (IsAuthenticated,)
-
-   def get(self,request,*args, **kwargs):
-      data = []
-      one_week_ago = timezone.now() - timezone.timedelta(days=7)
-      Notifications = Notification.objects.filter(user = self.request.user).filter(timestamp__range=[one_week_ago,timezone.now()]).filter(is_read = True)
-      for n in Notifications:
-          serializer = GetNotificationSerializer(n)
-          data.append(serializer.data)
-      message_data = data[::-1]
-      return Response({"message":"Here are all your seen messages from the last week!","data":message_data},status = status.HTTP_200_OK)
-
-class GetUnreadNotificationsView(GenericAPIView):
-   serializer_class = GetNotificationSerializer
-   permission_classes = (IsAuthenticated,)
-
-   def get(self,request,*args, **kwargs):
-      data = []
-      one_week_ago = timezone.now() - timezone.timedelta(days=7)
-      Notifications = Notification.objects.filter(user = self.request.user).filter(timestamp__range=[one_week_ago,timezone.now()]).filter(is_read = False)
-      for n in Notifications:
-          serializer = GetNotificationSerializer(n)
-          data.append(serializer.data)
-      message_data = data[::-1]
-      return Response({"message":"Here are all your unread messages from the last week!","data":message_data},status = status.HTTP_200_OK)
-
-class SeeNotificationView(GenericAPIView):
-   serializer_class = GetNotificationSerializer
-   permission_classes = (IsAuthenticated,)
-
-   def get(self,request,*args, **kwargs):
-      id = self.request.query_params.get('id')
-      notif = Notification.objects.get(id = id)
-      if notif.user == self.request.user:
-         notif.is_read = True
-         notif.save()
-         notif_data = GetNotificationSerializer(notif)
-         return Response({"message":"Fetched succesfully","data":notif_data.data},status = status.HTTP_200_OK)
-      else:
-         return Response({"message":"Not Authorized"},status = status.HTTP_400_BAD_REQUEST)
+    def get(self,request,*args, **kwargs):
+        id = self.request.query_params.get('id')
+        post = Notification.objects.get(id = id)
+        try:
+          like = Likes.objects.get(post_id = post,liked_by = self.request.user)
+          like.delete()
+        #  return Response({"message":"Unliked"},status = status.HTTP_200_OK)
+        except:
+            Likes.objects.create(post_id = post,liked_by = self.request.user)
+         #   return Response({"message":"Liked"},status = status.HTTP_200_OK)
+        return redirect('Feed')
