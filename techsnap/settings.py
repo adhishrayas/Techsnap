@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-55b-47mkye==&lk-vk!o3&0zzz8!thrc9d@%i^=wrtr#b!4$6&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True # Can't Load images when this is False, have to look into it
 
 ALLOWED_HOSTS = ['*']
 CORS_ALLOWED_ORIGINS = [
@@ -141,3 +141,4 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'auth_modules.CustomUser'
 MEDIA_URL = '/media/' 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
+handler404 = 'techsnap.views.custom_404'

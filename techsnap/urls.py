@@ -35,7 +35,7 @@ schema_view = get_schema_view(
 )
 
 
-
+handler404 = 'techsnap.views.custom_404'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/',include('auth_modules.urls'),name = "Auth Module"),

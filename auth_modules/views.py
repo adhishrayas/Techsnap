@@ -85,5 +85,3 @@ def success_view(request):
 
 
 
-
-
