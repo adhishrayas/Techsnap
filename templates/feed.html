@@ -98,6 +98,15 @@
             cursor: pointer;
         }
 
+        .comment-button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -186,6 +195,7 @@
             <div class="post-footer">
                 <span id="likes-{{ post.id }}" class="likes"><strong>Likes:</strong> {{ post.like }}</span> |
                 <span class="timestamp"><strong>Timestamp:</strong> {{ post.timestamp }}</span>
+                <a href="{% url 'posts:Get_Comments'  %}" class="comment-button">Comment</a>
                 <a class="like-button" href="#" data-post-id="{{ post.id }}">Like</a>
             </div>
         </div>

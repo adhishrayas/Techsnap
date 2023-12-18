@@ -13,9 +13,13 @@ class Notification(models.Model):
     content = models.TextField()
     pic = models.ImageField(upload_to='posts/',null = True,blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    parent_post = models.ForeignKey('self',on_delete = models.CASCADE,blank = True,null = True,related_name = 'replies')
 
     def __str__(self):
         return self.user.username
+    
+    def is_reply(self):
+        return self.parent_post is not None
     
 
 class Likes(models.Model):

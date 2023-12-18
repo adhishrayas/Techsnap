@@ -54,7 +54,9 @@
         <p><strong>Content:</strong> {{ post.content }}</p>
         <p><strong>Timestamp:</strong> {{ post.timestamp }}</p>
         <p><strong>Likes:</strong> {{ post.like }}</p>
-
+        {% if post.parent_post %}
+           <p><strong>Commented on:</strong> {{post.parent_post}}</p>
+        {% endif %}
         {% if post.pic %}
             <img src="{{ post.pic }}" alt="Post Image">
         {% endif %}
