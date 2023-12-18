@@ -18,4 +18,4 @@ class Notification(models.Model):
     button_url = models.TextField()
 
     def __str__(self):
-        return self.id
+        return str(self.id)
