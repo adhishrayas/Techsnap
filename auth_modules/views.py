@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth import login,logout
-from .serializers import SignUpSerializer,LoginSerializer
+from .serializers import SignUpSerializer,LoginSerializer,ProfileSerializer
 from rest_framework.generics import GenericAPIView
 from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .models import CustomUser
@@ -78,6 +79,19 @@ class LogoutView(APIView):
         message = "Unable to log out"
         return render(request, 'logout_view.html', {'message': message})
 
+
+class ProfilePageView(GenericAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return self.request.user
+    
+    def get(self,request,*args, **kwargs):
+        user = self.request.user
+        serializer = ProfileSerializer(user)
+        return Response({"data":serializer.data})
+    
 
 def success_view(request):
     return render(request, 'success.html')   

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     'notifications.apps.NotificationsConfig',
     'auth_modules.apps.AuthModulesConfig',
+    'movies.apps.MoviesConfig',
 ]
 
 MIDDLEWARE = [
