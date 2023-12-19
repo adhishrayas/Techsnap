@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer,SerializerMethodField
 from .models import CustomUser,UserFollowing
-from movies.serializers import MovieSerializer,PlayListSerializer
+from movies.serializers import MovieSerializer,PlayListSerializer,PlaylistMiniSerializer
 from movies.models import MoviesLikes,Playlists
 
 class SignUpSerializer(ModelSerializer):
@@ -55,11 +55,11 @@ class ProfileSerializer(ModelSerializer):
     
     def get_playlists(self,obj):
         data = []
-        try:
-            playlists = Playlists.objects.filter(owner = obj)
-            for p in playlists:
-                serializer = PlayListSerializer(p)
+        #try:
+        playlists = Playlists.objects.filter(owner = obj)
+        for p in playlists:
+                serializer = PlaylistMiniSerializer(p)
                 data.append(serializer.data)
-            return data
-        except:
-            return None
+        return data
+        #except:
+           # return None

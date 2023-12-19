@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer,ReadOnlyField
+from rest_framework.serializers import ModelSerializer,ReadOnlyField,SerializerMethodField
 from .models import Movies,Playlists
 
 
@@ -24,3 +24,20 @@ class PlayListSerializer(ModelSerializer):
             movie = Movies.objects.get(**movie_data)
             playlist.movies.add(movie)
         return playlist
+
+class PlaylistMiniSerializer(ModelSerializer):
+    movie_count = SerializerMethodField()
+    playlist_cover = SerializerMethodField()
+    class Meta:
+        model = Playlists
+        fields = ("title","movie_count","playlist_cover")
+    
+    def get_movie_count(self,obj):
+        return obj.movies.count()
+    
+    def get_playlist_cover(self,obj):
+        movie = obj.movies.all().first()
+        if movie:
+           return movie.movie_file
+        else:
+            return None

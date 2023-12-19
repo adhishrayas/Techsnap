@@ -90,7 +90,8 @@ class ProfilePageView(GenericAPIView):
     def get(self,request,*args, **kwargs):
         user = self.request.user
         serializer = ProfileSerializer(user)
-        return Response({"data":serializer.data})
+        #return Response({"data":serializer.data})
+        return render(request, 'profile.html', {"data":serializer.data})
     
 
 def success_view(request):
