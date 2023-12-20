@@ -27,6 +27,12 @@ class FollowingSerializer(ModelSerializer):
         model = UserFollowing
         fields = ("id", "following_user_id", "created")
 
+class BasicProfileSerializer(ModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = ("email","about","profile_pic","Phone_no","username")
+
 class ProfileSerializer(ModelSerializer):
     following = SerializerMethodField()
     followers = SerializerMethodField()

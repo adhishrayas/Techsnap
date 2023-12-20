@@ -40,8 +40,20 @@ class CreatePlayListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PlayListSerializer
 
-    def perform_create(self,serializer):
-        serializer.save(owner = self.request.user)
+    def get(self,request,*args, **kwargs):
+        return render(request,'create_playlist.html')
+    
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data['owner'] = request.user.id
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+
+    def perform_create(self, serializer):
+        serializer.save()
 
 class ViewPlayListView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
@@ -101,3 +113,13 @@ class AddtoPlaylistView(APIView):
         playlist.save()
         return Response({"message":"Added to playlist"})
 
+
+class GetAllMovies(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        data = []
+        for m in Movies.objects.all():
+            serializer = MovieSerializer(m)
+            data.append(serializer.data)
+        return data

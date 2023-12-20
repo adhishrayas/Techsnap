@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth import login,logout
-from .serializers import SignUpSerializer,LoginSerializer,ProfileSerializer
+from .serializers import SignUpSerializer,LoginSerializer,ProfileSerializer,BasicProfileSerializer
 from rest_framework.generics import GenericAPIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -94,7 +94,7 @@ class MyProfilePageView(GenericAPIView):
         user = self.request.user
         serializer = ProfileSerializer(user)
         #return Response({"data":serializer.data})
-        return render(request, 'profile.html', {"data":serializer.data})
+        return render(request, 'my_profile.html', {"data":serializer.data})
     
 class ProfilePageView(GenericAPIView):
     serializer_class = ProfileSerializer
