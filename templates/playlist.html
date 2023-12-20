@@ -100,6 +100,21 @@
             background-color: #b5070d; /* Darker shade of red on hover */
         }
 
+        #remove-playlist-button {
+            background-color: #e50914; /* Netflix red */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        #remove-playlist-button:hover {
+            background-color: #b5070d; /* Darker shade of red on hover */
+        }
+
         #moviePopup {
             display: none;
             position: fixed;
@@ -147,11 +162,12 @@
             <h2>Movies</h2>
             <div class="scroll-container">
                 {% for movie in data.movies %}
-                    <div class="movie-card">
+                    <div class="movie-card" id="movie-{{ movie.id }}">
                         <img src="{{ movie.movie_file }}" alt="{{ movie.title }}">
                         <div class="movie-card-content">
                             <h3>{{ movie.title }}</h3>
                             <p><strong>Year of Release:</strong> {{ movie.year_of_release }}</p>
+                            <button id="remove-playlist-button" onclick="removeMovie('{{ movie.id }}')">Remove</button>
                             <!-- Add other movie details as needed -->
                         </div>
                     </div>
@@ -183,7 +199,31 @@
                 .catch(error => console.error('Error fetching movie data:', error));
         }
 
-        function addToPlaylist(movieId) {
+        function removeMovie(movieId) {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const playlistId = urlParams.get('id');
+            const removeEndpoint = '{% url "movies:remove_from_playlist" %}';
+            const url = `${removeEndpoint}?movie_id=${movieId}&playlist_id=${playlistId}`;
+        
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message); // Log the response from the server
+                    // You can add additional logic here if needed
+                    if (data.message === 'Removed from playlist') {
+                        // Optionally handle UI updates or other actions
+                        // For example, you can remove the movie card from the playlist
+                        const movieCard = document.getElementById(`movie-${movieId}`);
+                        if (movieCard) {
+                            movieCard.remove();
+                        }
+                    }
+                })
+                .catch(error => console.error('Error removing from playlist:', error));
+        }
+        
+        function addToPlaylist(movieId,addButton) {
             const queryString = window.location.search;
             const urlParams = new URLSearchParams(queryString);
             const playlistId = urlParams.get('id')
@@ -195,19 +235,15 @@
                 .then(data => {
                 console.log(data.message); // Log the response from the server
                 // You can add additional logic here if needed
+                if (data.message === 'Added to playlist') {
+                    addButton.style.backgroundColor = '#00cc00'; // Green color
+                    addButton.style.color = '#000000'; 
+                    addButton.textContent = 'Added';
+                    addButton.disabled = true; // Optionally disable the button
+                }
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
         }
-
-        function getParameterByName(name) {
-            name = name.replace(/[\[\]]/g, "\\$&");
-            const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                results = regex.exec(window.location.href);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        }
-
 
         function showMoviePopup(movies) {
             const popup = document.getElementById('moviePopup');
@@ -236,8 +272,8 @@
 
                 const addButton = document.createElement('button');
                 addButton.textContent = '+ Add to Playlist';
-                addButton.addEventListener('click', function() {
-                    addToPlaylist(movie.id)
+                addButton.addEventListener('click', function(event) {
+                    addToPlaylist(movie.id,addButton)
                 });
                 movieCardContent.appendChild(movieTitle);
                 movieCardContent.appendChild(releaseYear);

@@ -125,6 +125,26 @@ class AddtoPlaylistView(APIView):
         except Playlists.DoesNotExist:
             return Response({"message": "Playlist not found"}, status=400)
 
+class RemoveFromPlaylistView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        movie_id = self.request.query_params.get('movie_id')
+        playlist_id = self.request.query_params.get('playlist_id')
+
+        try:
+            movie = Movies.objects.get(id=movie_id)
+            playlist = Playlists.objects.get(id=playlist_id)
+
+            playlist.movies.remove(movie)
+            playlist.save()
+            return Response({"message": "Removed from playlist"})
+        except Movies.DoesNotExist:
+            return Response({"message": "Movie not found"}, status=400)
+        except Playlists.DoesNotExist:
+            return Response({"message": "Playlist not found"}, status=400)
+        
+
 class GetAllMovies(APIView):
     permission_classes = (IsAuthenticated,)
 
