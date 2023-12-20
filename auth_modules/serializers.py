@@ -7,7 +7,7 @@ class SignUpSerializer(ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ("username","email","password","Phone_no")
+        fields = ("username","email","password","Phone_no","id")
 
 class LoginSerializer(ModelSerializer):
 

@@ -5,8 +5,9 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.permissions import AllowAny,IsAuthenticated
-from .models import CustomUser
+from .models import CustomUser,UserFollowing
 # Create your views here.
 
 class SignUpView(GenericAPIView):
@@ -59,6 +60,7 @@ class LoginView(GenericAPIView):
                     "token": token.key,
                     "user_data": user_data.data
                 }
+                #return Response({"data":payload})
                 # Render the success template with the payload data
                 return render(request, 'loginsuccess.html', payload)
             else:
@@ -68,6 +70,7 @@ class LoginView(GenericAPIView):
 
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
+
     def get(self,request):
       try:
         user = self.request.user
@@ -80,7 +83,7 @@ class LogoutView(APIView):
         return render(request, 'logout_view.html', {'message': message})
 
 
-class ProfilePageView(GenericAPIView):
+class MyProfilePageView(GenericAPIView):
     serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -93,6 +96,36 @@ class ProfilePageView(GenericAPIView):
         #return Response({"data":serializer.data})
         return render(request, 'profile.html', {"data":serializer.data})
     
+class ProfilePageView(GenericAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        id = self.request.query_params.get('id')
+        user = CustomUser.objects.get(id = id)
+        return user
+    
+    def get(self,request,*args, **kwargs):
+        user = self.get_queryset()
+        serializer = ProfileSerializer(user)
+        #return Response({"data":serializer.data})
+        return render(request, 'profile.html', {"data":serializer.data})
+    
+class FollowUnfollowView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        user = self.request.user
+        id = self.request.query_params.get('id')
+        following = CustomUser.objects.get(id = id)
+        try:
+            follow_obj = UserFollowing.objects.get(user_id = user,following_user_id = following)
+            follow_obj.delete()
+            return Response({"message":"Unfollowed"},status=status.HTTP_200_OK)
+        except:
+            follow_obj = UserFollowing.objects.create(user_id = user,following_user_id = following)
+            return Response({"message":"Followed"},status = status.HTTP_200_OK)
+
 
 def success_view(request):
     return render(request, 'success.html')   

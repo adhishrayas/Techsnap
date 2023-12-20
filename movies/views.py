@@ -65,3 +65,39 @@ class ViewPlayListView(GenericAPIView):
         else:
             serializer = PlayListSerializer(playlist)
             return Response({"data":serializer.data},status=status.HTTP_200_OK)
+        
+class MovieDetailView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        id = self.request.query_params.get('id')
+        movie = Movies.objects.get(id = id)
+        movie.views += 1
+        movie.save()
+        serializer = MovieSerializer(movie)
+        return Response({"data":serializer.data},status=status.HTTP_200_OK)
+
+class GetPlaylistsView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        user = self.request.user
+        playlists = Playlists.objects.filter(owner = user)
+        data = []
+        for p in playlists:
+            playlist_data = PlayListSerializer(p)
+            data.append(playlist_data.data)
+        return Response({"data":data},status=status.HTTP_200_OK)
+    
+class AddtoPlaylistView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self,request,*args, **kwargs):
+        movie_id = self.request.query_params.get('movie_id')
+        playlist_id = self.request.query_params.get('playlist_id')
+        movie = Movies.objects.get('movie_id')
+        playlist = Playlists.objects.get('playlist_id')
+        playlist.movies.add(movie)
+        playlist.save()
+        return Response({"message":"Added to playlist"})
+

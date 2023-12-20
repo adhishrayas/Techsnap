@@ -14,6 +14,7 @@ class Movies(models.Model):
     title = models.CharField(max_length = 255,blank = False)
     uploaded_by = models.ForeignKey(UserModel,on_delete = models.CASCADE)
     movie_file = models.FileField(upload_to='movies/')
+    description = models.TextField(blank = True,null = True)
     year_of_release = models.IntegerField(blank = True,null = True)
     rating = models.IntegerField(default = 0)
     rated_by = models.IntegerField(default = 0)
@@ -52,6 +53,6 @@ class Playlists(models.Model):
     owner = models.ForeignKey(UserModel,on_delete = models.CASCADE)
     movies = models.ManyToManyField(Movies,related_name="playlists")
     is_private = models.BooleanField(default = True)
-    
+    is_highlight = models.BooleanField(default = False)
     def __str__(self):
         return f'{self.owner}:-playlist{self.title}'
