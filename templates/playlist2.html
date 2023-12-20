@@ -187,7 +187,8 @@
             const popup = document.getElementById('moviePopup');
             const movieList = document.getElementById('movieList');
             movieList.innerHTML = ''; // Clear previous content
-           
+            const urlParams = new URLSearchParams(window.location.search);
+            const playlistId = urlParams.get('id');
             movies.data.forEach(movie => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('movie-list-item');
@@ -211,11 +212,21 @@
                 const addButton = document.createElement('button');
                 addButton.textContent = '+ Add to Playlist';
                 addButton.addEventListener('click', function() {
-                    // You can add your logic here to handle the addition to the playlist
-                    console.log('Add to Playlist clicked for movie:', movie.title);
+                  //  const movieId = movie.id; // Assuming movie has an 'id' property
+        
+                    // Send a GET request to the AddtoPlaylistView endpoint
+                   // const addToPlaylistUrl = "movies:add_to_playlist" + '?movie_id=${movieId}&playlist_id=${playlistId}`;
+        
+                  //  fetch(addToPlaylistUrl)
+                 //       .then(response => {
+                 //           if (response.ok) {
+                 //               console.log('Added to playlist successfully.');
+                 //           } else {
+                 //               console.error('Error adding to playlist:', response.status);
+                  //          }
+                  //      })
+                  //      .catch(error => console.error('Error adding to playlist:', error));///
                 });
-
-    
                 movieCardContent.appendChild(movieTitle);
                 movieCardContent.appendChild(releaseYear);
                 movieCardContent.appendChild(addButton);

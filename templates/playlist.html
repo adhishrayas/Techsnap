@@ -182,12 +182,38 @@
                 .then(data => showMoviePopup(data))
                 .catch(error => console.error('Error fetching movie data:', error));
         }
+
+        function addToPlaylist(movieId) {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const playlistId = urlParams.get('id')
+            const addtp = '{% url "movies:add_to_playlist" %}';
+            const url = addtp+`?movie_id=${movieId}&&playlist_id=${playlistId}`;
     
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                console.log(data.message); // Log the response from the server
+                // You can add additional logic here if needed
+                })
+                .catch(error => console.error('Error adding to playlist:', error));
+        }
+
+        function getParameterByName(name) {
+            name = name.replace(/[\[\]]/g, "\\$&");
+            const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(window.location.href);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+
         function showMoviePopup(movies) {
             const popup = document.getElementById('moviePopup');
             const movieList = document.getElementById('movieList');
             movieList.innerHTML = ''; // Clear previous content
-           
+            
             movies.data.forEach(movie => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('movie-list-item');
@@ -211,11 +237,8 @@
                 const addButton = document.createElement('button');
                 addButton.textContent = '+ Add to Playlist';
                 addButton.addEventListener('click', function() {
-                    // You can add your logic here to handle the addition to the playlist
-                    console.log('Add to Playlist clicked for movie:', movie.title);
+                    addToPlaylist(movie.id)
                 });
-
-    
                 movieCardContent.appendChild(movieTitle);
                 movieCardContent.appendChild(releaseYear);
                 movieCardContent.appendChild(addButton);
@@ -237,6 +260,8 @@
             // Hide the popup and remove blur effect from the background
             popup.style.display = 'none';
         }
+
+
     </script>
 </body>
 </html>
