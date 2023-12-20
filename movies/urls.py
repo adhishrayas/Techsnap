@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import UploadMovieView,MovieLikeView,CreatePlayListView,ViewPlayListView,MovieDetailView,GetPlaylistsView,AddtoPlaylistView,GetAllMovies,RemoveFromPlaylistView
+from .views import UploadMovieView,MovieLikeView,CreatePlayListView,ViewPlayListView,MovieDetailView,GetPlaylistsView,AddtoPlaylistView,GetAllMovies,RemoveFromPlaylistView,DeletePlayListView
 
 
 app_name = "movies"
@@ -7,6 +7,7 @@ urlpatterns = [
     path('upload_movie/',UploadMovieView.as_view(),name = 'upload_movie'),
     path('like_movies/',MovieLikeView.as_view(),name = 'like_unlike_movie'),
     path('create_playlist/',CreatePlayListView.as_view(),name = 'create_playlist'),
+    path('remove_playlist/',DeletePlayListView.as_view(),name = 'delete_playlist'),
     path('view_playlist/',ViewPlayListView.as_view(),name = 'view_playlist'),
     path('movie_detail/',MovieDetailView.as_view(),name = 'about_movie'),
     path('get_playlists/',GetPlaylistsView.as_view(),name = 'get_playlists'),

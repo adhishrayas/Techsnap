@@ -5,7 +5,7 @@ from auth_modules.models import UserFollowing
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView,CreateAPIView
+from rest_framework.generics import GenericAPIView,CreateAPIView,DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -56,6 +56,15 @@ class CreatePlayListView(CreateAPIView):
     def perform_create(self, serializer):
         serializer.save()
 
+class DeletePlayListView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        id = self.request.query_params.get('id')
+        playlist = Playlists.objects.get(id = id)
+        playlist.delete()
+        return Response({"message":"Deleted"})
+    
 class ViewPlayListView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PlayListSerializer
