@@ -9,6 +9,11 @@ class MovieSerializer(ModelSerializer):
         fields = "__all__"
         extra_kwargs = {"id":{"read_only":True}}
 
+class MovieBriefSerializer(ModelSerializer):
+
+    class Meta:
+        model = Movies
+        fields = ("title","movie_file","year_of_release","id")
 class PlayListSerializer(ModelSerializer):
     movies = MovieSerializer(many = True,required = False)
 
@@ -30,7 +35,7 @@ class PlaylistMiniSerializer(ModelSerializer):
     playlist_cover = SerializerMethodField()
     class Meta:
         model = Playlists
-        fields = ("title","movie_count","playlist_cover")
+        fields = ("title","movie_count","playlist_cover","id")
     
     def get_movie_count(self,obj):
         return obj.movies.count()

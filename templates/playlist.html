@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <title>{{ data.title }}</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1c1c1c; /* Dark background */
+            color: #fff; /* Light text color */
+            transition: filter 0.3s ease; /* Transition for the blur effect */
+        }
+
+        .blur {
+            filter: blur(5px); /* Apply blur effect */
+        }
+
+        header {
+            background-color: #282828; /* Dark header background */
+            padding: 10px;
+            text-align: center;
+        }
+
+        h1, h2, h3 {
+            color: #e50914; /* Netflix red */
+            margin: 0;
+        }
+
+        .playlist-container {
+            max-width: 800px; /* Limit width for better readability */
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #282828; /* Dark container background */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .movie-card {
+            border: 1px solid #1e1e1e; /* Dark gray border */
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .movie-card img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-bottom: 2px solid #1e1e1e; /* Dark gray border */
+        }
+
+        .movie-card-content {
+            padding: 10px;
+        }
+
+        .movie-card-content h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff; /* Light text color */
+        }
+
+        .movie-card-content p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #ccc; /* Light gray text color */
+        }
+
+        .scroll-container {
+            max-height: 400px; /* Maximum height for scrollbar */
+            overflow-y: auto;
+        }
+
+        footer {
+            background-color: #282828; /* Dark footer background */
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #add-playlist-button {
+            background-color: #e50914; /* Netflix red */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        #add-playlist-button:hover {
+            background-color: #b5070d; /* Darker shade of red on hover */
+        }
+
+        #moviePopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #282828;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto; /* Add a scrollbar if content exceeds max-height */
+        }
+
+        .movie-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .movie-list-item {
+            margin-bottom: 10px;
+        }
+
+        .close-popup {
+            cursor: pointer;
+            color: #fff;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container"> <!-- Add this container -->
+        <header>
+            <h1>{{ data.title }}
+                <button id="add-playlist-button" onclick="addMovie()">Add Movie</button>
+            </h1>
+        </header>
+
+        <div class="playlist-container">
+            <p><strong>About:</strong> {{ data.about }}</p>
+            <h2>Movies</h2>
+            <div class="scroll-container">
+                {% for movie in data.movies %}
+                    <div class="movie-card">
+                        <img src="{{ movie.movie_file }}" alt="{{ movie.title }}">
+                        <div class="movie-card-content">
+                            <h3>{{ movie.title }}</h3>
+                            <p><strong>Year of Release:</strong> {{ movie.year_of_release }}</p>
+                            <!-- Add other movie details as needed -->
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; Techsnap</p>
+        </footer>
+    </div> <!-- Close the container -->
+
+    <div id="moviePopup">
+        <ul id="movieList" class="movie-list"></ul>
+        <span class="close-popup" onclick="closePopup()">Close</span>
+    </div>
+    <script>
+        function addMovie() {
+            const mainContainer = document.getElementById('main-container');
+            mainContainer.classList.add('blur');
+
+            // Use Django template tag to generate the URL dynamically
+            const url = '{% url "movies:get_all_movies" %}';
+    
+            // Make a GET request to fetch movie data and render the list
+            fetch(url)
+                .then(response => response.json())
+                .then(data => showMoviePopup(data))
+                .catch(error => console.error('Error fetching movie data:', error));
+        }
+    
+        function showMoviePopup(movies) {
+            const popup = document.getElementById('moviePopup');
+            const movieList = document.getElementById('movieList');
+            movieList.innerHTML = ''; // Clear previous content
+           
+            movies.data.forEach(movie => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('movie-list-item');
+    
+                const movieCard = document.createElement('div');
+                movieCard.classList.add('movie-card');
+    
+                const movieImage = document.createElement('img');
+                movieImage.src = movie.movie_file;
+                movieImage.alt = movie.title;
+    
+                const movieCardContent = document.createElement('div');
+                movieCardContent.classList.add('movie-card-content');
+    
+                const movieTitle = document.createElement('h3');
+                movieTitle.textContent = movie.title;
+    
+                const releaseYear = document.createElement('p');
+                releaseYear.innerHTML = `<strong>Year of Release:</strong> ${movie.year_of_release}`;
+
+                const addButton = document.createElement('button');
+                addButton.textContent = '+ Add to Playlist';
+                addButton.addEventListener('click', function() {
+                    // You can add your logic here to handle the addition to the playlist
+                    console.log('Add to Playlist clicked for movie:', movie.title);
+                });
+
+    
+                movieCardContent.appendChild(movieTitle);
+                movieCardContent.appendChild(releaseYear);
+                movieCardContent.appendChild(addButton);
+                movieCard.appendChild(movieImage);
+                movieCard.appendChild(movieCardContent);
+    
+                listItem.appendChild(movieCard);
+                movieList.appendChild(listItem);
+            });
+    
+            popup.style.display = 'block'; // Show the popup
+        }
+        function closePopup() {
+            const mainContainer = document.getElementById('main-container');
+            mainContainer.classList.remove('blur');
+
+            const popup = document.getElementById('moviePopup');
+    
+            // Hide the popup and remove blur effect from the background
+            popup.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
