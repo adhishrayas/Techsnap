@@ -162,13 +162,12 @@
             <h2>Movies</h2>
             <div class="scroll-container">
                 {% for movie in data.movies %}
-                    <div class="movie-card" id="movie-{{ movie.id }}">
+                    <div class="movie-card" id="movie-{{ movie.id }}" onclick="redirect('{{movie.id}}')">
                         <img src="{{ movie.movie_file }}" alt="{{ movie.title }}">
                         <div class="movie-card-content">
                             <h3>{{ movie.title }}</h3>
                             <p><strong>Year of Release:</strong> {{ movie.year_of_release }}</p>
-                            <button id="remove-playlist-button" onclick="removeMovie('{{ movie.id }}')">Remove</button>
-                            <!-- Add other movie details as needed -->
+                            <button id="remove-playlist-button" onclick="removeMovie('{{ movie.id }}');event.stopPropagation()">Remove</button>
                         </div>
                     </div>
                 {% endfor %}
@@ -181,7 +180,7 @@
     </div> <!-- Close the container -->
 
     <div id="moviePopup">
-        <ul id="movieList" class="movie-list"></ul>
+        <ul id="movieList" class="movie-list" ></ul>
         <span class="close-popup" onclick="closePopup()">Close</span>
     </div>
     <script>
@@ -224,6 +223,7 @@
         }
         
         function addToPlaylist(movieId,addButton) {
+            event.stopPropagation()
             const queryString = window.location.search;
             const urlParams = new URLSearchParams(queryString);
             const playlistId = urlParams.get('id')
@@ -273,7 +273,10 @@
                 const addButton = document.createElement('button');
                 addButton.textContent = '+ Add to Playlist';
                 addButton.addEventListener('click', function(event) {
-                    addToPlaylist(movie.id,addButton)
+                    addToPlaylist(movie.id,addButton,event.stopPropagation())
+                });
+                movieCard.addEventListener('click', function (event) {
+                    redirect(movie.id);
                 });
                 movieCardContent.appendChild(movieTitle);
                 movieCardContent.appendChild(releaseYear);
@@ -287,6 +290,11 @@
     
             popup.style.display = 'block'; // Show the popup
         }
+
+        function redirect(movieID){
+            window.location.href = '{% url "movies:about_movie" %}' + `?id=${movieID}`;
+        }
+
         function closePopup() {
             const mainContainer = document.getElementById('main-container');
             mainContainer.classList.remove('blur');
