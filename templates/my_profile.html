@@ -193,6 +193,21 @@
             background-color: #b5070d; /* Darker shade of red on hover */
         }
 
+        #follow-button {
+            background-color: #e50914; /* Netflix red */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        #follow-button:hover {
+            background-color: #b5070d; /* Darker shade of red on hover */
+        }
+
         .close-popup {
             cursor: pointer;
             color: #fff;
@@ -205,7 +220,11 @@
 <body>
     <div id="main-container">
         <header>
-           <h1>{{ data.username }}'s Profile</h1>
+           <h1>{{ data.username }}'s Profile
+               {% if not is_owner %}
+                  <button id = "follow-button" onclick="follow()">Follow</button>
+               {% endif %}
+           </h1>
         </header>
 
         <div class="profile-container">
@@ -312,11 +331,24 @@
             return false;
         }
 
-        function checkOwner() {
+        function follow(){
             const queryString = window.location.search;
             const urlParams = new URLSearchParams(queryString);
-            const userId = urlParams.get('id');
-            return !userId;
+            const userId = urlParams.get('id')
+            const url = '{% url "Authmodules:follow" %}' + `?id=${userId}`
+            const button = document.getElementById('follow-button')
+            fetch(url)
+                .then(response => response.json())
+                .then(data =>{
+                    console.log(data)
+                    if(data.message === "Followed"){
+                        button.style.backgroundColor = '#00cc00'; // Green color
+                        button.style.color = '#000000'; 
+                        button.textContent = 'Following';
+                        button.disabled = true;
+                    }
+                })
+                .catch(error => console.error('Error in processing the request', error));
         }
     </script>
 </body>
