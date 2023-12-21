@@ -188,11 +188,9 @@
                 const playlistCard = document.createElement('div');
                 playlistCard.classList.add('playlist-card');
 
-                if (typeof playlist.playlist_cover != "undefined"){
                 const PlaylistCover = document.createElement('img');
                 PlaylistCover.src = playlist.playlist_cover;
                 PlaylistCover.alt = playlist.title;
-                }
 
                 const PlaylistCardContent = document.createElement('div');
                 PlaylistCardContent.classList.add('playlist-card-content');
@@ -211,9 +209,7 @@
                 PlaylistCardContent.appendChild(PlayListTitle);
                 PlaylistCardContent.appendChild(MovieCount);
                 PlaylistCardContent.appendChild(addButton);
-                if (typeof PlaylistCover != "undefined"){
                 playlistCard.appendChild(PlaylistCover);
-                }
                 playlistCard.appendChild(PlaylistCardContent);
                 listItem.appendChild(playlistCard);
                 PlayList.appendChild(listItem);
