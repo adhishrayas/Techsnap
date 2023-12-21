@@ -136,6 +136,30 @@ class FollowUnfollowView(APIView):
         except:
             follow_obj = UserFollowing.objects.create(user_id = user,following_user_id = following)
             return Response({"message":"Followed"},status = status.HTTP_200_OK)
+        
+class EditProfileView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = BasicProfileSerializer
+
+    def post(self,request,*args, **kwargs):
+        user = self.get_object()
+        data = request.data.copy()
+        if data['email']:
+            user.email = data['email']
+        if data['about']:
+            user.about = data['about']
+        if data.get('username'):
+            user.username = data['username']
+        if data['Phone_no']:
+            user.Phone_no = data['Phone_no']
+        if 'profile_pic' in request.FILES:
+            user.profile_pic = request.FILES['profile_pic']
+        user.save()
+        return Response({"message":"updated"})
+    
+    def get_object(self):
+        return self.request.user
+
 
 def success_view(request):
     return render(request, 'success.html')   

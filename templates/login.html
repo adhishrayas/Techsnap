@@ -4,21 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <!-- Add your CSS styling here -->
+    <!-- Updated color scheme -->
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
+            background-color: #1c1c1c; /* Dark background */
             margin: 0;
             padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            color: #fff; /* Light text color */
         }
 
         .login-container {
-            background-color: #fff;
+            background-color: #282828; /* Dark container background */
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -30,12 +31,14 @@
             padding: 10px;
             margin: 8px 0;
             box-sizing: border-box;
-            border: 1px solid #ccc;
+            border: 1px solid #1e1e1e; /* Dark gray border */
             border-radius: 4px;
+            background-color: #1e1e1e; /* Dark gray background */
+            color: #fff; /* Light text color */
         }
 
         button {
-            background-color: #4caf50;
+            background-color: #e50914; /* Netflix red */
             color: white;
             padding: 10px 15px;
             margin: 8px 0;
@@ -46,14 +49,14 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #b5070d; /* Darker shade of red on hover */
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <h2>Login</h2>
-        <form action="http://127.0.0.1:8000/accounts/login" method="post">
+        <form action='{% url "Authmodules:login" %}' method="post">
             {% csrf_token %}
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" value="{{ email }}" required>

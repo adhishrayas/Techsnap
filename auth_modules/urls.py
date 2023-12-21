@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import SignUpView,LoginView,LogoutView,success_view,FollowUnfollowView,ProfilePageView
+from .views import SignUpView,LoginView,LogoutView,success_view,FollowUnfollowView,ProfilePageView,EditProfileView
 
 
 app_name = 'Authmodules'
@@ -10,4 +10,5 @@ urlpatterns = [
     path('success',success_view, name='success-page'),
     path('logout',LogoutView.as_view(),name = "logout"),
     path('follow',FollowUnfollowView.as_view(),name = "follow"),
+    path('edit',EditProfileView.as_view(),name = "edit"),
 ]
