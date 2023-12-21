@@ -226,7 +226,7 @@
            <ul>
                {% for movie in data.liked_movies %}
                     <li class="horizontal-item">
-                       <div class="movie-card">
+                       <div class="movie-card" onclick = "seeMovie('{{movie.id}}')">
                            <img src="{{ movie.movie_file }}" alt="{{ movie.title }}">
                            <div class="movie-card-content">
                              <h3>{{ movie.title }}</h3>
@@ -269,6 +269,10 @@
         <button id="yes-playlist-button" onclick="deletePlaylist()">Delete</button>
     </div>
     <script>
+
+        function seeMovie(MovieID){
+            window.location.href = '{% url "movies:about_movie" %}' + `?id=${MovieID}`
+        }
         function addPlaylist() {
             window.location.href = '{% url "movies:create_playlist" %}';
         }

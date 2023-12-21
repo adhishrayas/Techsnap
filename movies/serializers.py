@@ -43,6 +43,6 @@ class PlaylistMiniSerializer(ModelSerializer):
     def get_playlist_cover(self,obj):
         movie = obj.movies.all().first()
         if movie:
-           return movie.movie_file
+           return movie.movie_file.url
         else:
             return None

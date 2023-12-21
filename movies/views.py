@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import MoviesLikes,Movies,Playlists
-from .serializers import MovieSerializer,PlayListSerializer,MovieBriefSerializer
+from .serializers import MovieSerializer,PlayListSerializer,MovieBriefSerializer,PlaylistMiniSerializer
 from auth_modules.models import UserFollowing
 from rest_framework import status
 from rest_framework.response import Response
@@ -32,9 +32,10 @@ class MovieLikeView(APIView):
         try:
           like = MoviesLikes.objects.get(liked_on= movie,liked_by = self.request.user)
           like.delete()
+          return Response({"Message":"Unliked"})
         except:
           MoviesLikes.objects.create(liked_on = movie,liked_by = self.request.user)
-        return Response({"Message":"Succesfull"})
+          return Response({"Message":"Liked"})
   
 class CreatePlayListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -49,9 +50,9 @@ class CreatePlayListView(CreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
         context = {"data":serializer.data}
-        return render(request,'playlist.html',context)
+        print(context)
+        return Response(context)
 
     def perform_create(self, serializer):
         serializer.save()
@@ -100,6 +101,7 @@ class MovieDetailView(APIView):
         movie.views += 1
         movie.save()
         serializer = MovieSerializer(movie)
+        return render(request,'movie_detail.html',{"data":serializer.data})
         return Response({"data":serializer.data},status=status.HTTP_200_OK)
 
 class GetPlaylistsView(APIView):
@@ -110,7 +112,7 @@ class GetPlaylistsView(APIView):
         playlists = Playlists.objects.filter(owner = user)
         data = []
         for p in playlists:
-            playlist_data = PlayListSerializer(p)
+            playlist_data = PlaylistMiniSerializer(p)
             data.append(playlist_data.data)
         return Response({"data":data},status=status.HTTP_200_OK)
     

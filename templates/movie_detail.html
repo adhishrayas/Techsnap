@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ data.title }}</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1c1c1c; /* Dark background */
+            color: #fff; /* Light text color */
+        }
+
+        header {
+            background-color: #282828; /* Dark header background */
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1, h2 {
+            color: #e50914; /* Netflix red */
+            margin: 0;
+        }
+
+        .movie-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        img {
+            border-radius: 8px;
+            max-width: 50%; /* Adjust the width as needed */
+            height: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .movie-details {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        #like-button,
+        #add-to-playlist-button {
+            background-color: #e50914; /* Netflix red */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px; /* Adjust the margin as needed */
+            margin-left: 10px; /* Add margin between buttons */
+        }
+
+        #like-button:hover,
+        #add-to-playlist-button:hover {
+            background-color: #b5070d; /* Darker shade of red on hover */
+        }
+
+        #playlistPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #282828;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto; /* Add a scrollbar if content exceeds max-height */
+        }
+
+        .playlist-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .playlist-list-item {
+            margin-bottom: 10px;
+        }
+
+        .close-popup {
+            cursor: pointer;
+            color: #fff;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main-container">
+        <header>
+            <h1>{{ data.title }}</h1>
+            <div class="button-container">
+                <button id="like-button" onclick="likeMovie('{{data.id}}', this)">Like</button>
+                <button id="add-to-playlist-button" onclick="addToPlaylist()">Add to Playlist</button>
+            </div>
+        </header>
+
+        <div class="movie-container">
+            <img src="{{ data.movie_file }}" alt="{{ data.title }}">
+
+            <div class="movie-details">
+                <p><strong>Description:</strong> {{ data.description|default:"Not available" }}</p>
+                <p><strong>Year of Release:</strong> {{ data.year_of_release }}</p>
+                <p><strong>Total Rating:</strong> {{ data.total_rating }}</p>
+                <p><strong>Rating:</strong> {{ data.rating }}</p>
+                <p><strong>Rated By:</strong> {{ data.rated_by }}</p>
+                <p><strong>Views:</strong> {{ data.views }}</p>
+                <p><strong>Uploaded By:</strong> {{ data.uploaded_by }}</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; Techsnap</p>
+        </footer>
+    </div>
+
+    <!-- Playlist Popup -->
+    <div id="playlistPopup">
+        <ul id="play-list" class="playlist-list"></ul>
+        <span class="close-popup" onclick="closePopup()">Close</span>
+    </div>
+
+    <script>
+        function likeMovie(MovieId, LikeButton) {
+            const url = '{% url "movies:like_unlike_movie" %}' + `?id=${MovieId}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.Message);
+                    if (data.Message === 'Liked') {
+                        LikeButton.style.backgroundColor = '#00cc00'; // Green color
+                        LikeButton.style.color = '#000000'; 
+                        LikeButton.textContent = 'Liked';
+                    } else {
+                        LikeButton.style.backgroundColor = '#e50914'; // Green color
+                        LikeButton.style.color = '#000000'; 
+                        LikeButton.textContent = 'Like';
+                    }
+                })
+                .catch(error => console.error('Error adding to playlist:', error));
+        }
+
+        function addToPlaylist() {
+            const mainContainer = document.getElementById('main-container');
+            mainContainer.classList.add('blur');
+            const url = '{% url "movies:get_playlists" %}';
+            fetch(url)
+                .then(response => response.json())
+                .then(data => showPlaylistPopup(data))
+                .catch(error => console.error('Error fetching playlist data:', error));
+        }
+
+        function showPlaylistPopup(playlists) {
+            const popup = document.getElementById('playlistPopup');
+            const PlayList = document.getElementById('play-list');
+            PlayList.innerHTML = ''; // Clear previous content
+
+            playlists.data.forEach(playlist => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('playlist-list-item');
+
+                const playlistCard = document.createElement('div');
+                playlistCard.classList.add('playlist-card');
+
+                if (typeof playlist.playlist_cover != "undefined"){
+                const PlaylistCover = document.createElement('img');
+                PlaylistCover.src = playlist.playlist_cover;
+                PlaylistCover.alt = playlist.title;
+                }
+
+                const PlaylistCardContent = document.createElement('div');
+                PlaylistCardContent.classList.add('playlist-card-content');
+
+                const PlayListTitle = document.createElement('h3');
+                PlayListTitle.textContent = playlist.title;
+
+                const MovieCount = document.createElement('p');
+                MovieCount.innerHTML = `<strong>Movies:</strong> ${playlist.movie_count}`;
+
+                const addButton = document.createElement('button');
+                addButton.textContent = '+ Add to this Playlist';
+                addButton.addEventListener('click', function (event) {
+                    addMovie(playlist.id, addButton);
+                });
+                PlaylistCardContent.appendChild(PlayListTitle);
+                PlaylistCardContent.appendChild(MovieCount);
+                PlaylistCardContent.appendChild(addButton);
+                if (typeof PlaylistCover != "undefined"){
+                playlistCard.appendChild(PlaylistCover);
+                }
+                playlistCard.appendChild(PlaylistCardContent);
+                listItem.appendChild(playlistCard);
+                PlayList.appendChild(listItem);
+            });
+
+            popup.style.display = 'block';
+        }
+
+        function addMovie(playlistID,addButton){
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const url = '{% url "movies:add_to_playlist" %}' + `?movie_id=${MovieId}&playlist_id=${playlistID}`
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+            console.log(data.message);
+            if (data.message === 'Added to playlist') {
+                addButton.style.backgroundColor = '#00cc00'; 
+                addButton.style.color = '#000000'; 
+                addButton.textContent = 'Added';
+                addButton.disabled = true;
+            }
+            })
+            .catch(error => console.error('Error adding to playlist:', error));
+        }
+
+        function closePopup() {
+            const mainContainer = document.getElementById('main-container');
+            mainContainer.classList.remove('blur');
+            const popup = document.getElementById('playlistPopup');
+
+            // Hide the popup and remove blur effect from the background
+            popup.style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

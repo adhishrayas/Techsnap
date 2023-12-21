@@ -83,7 +83,7 @@
     </header>
 
     <div class="create-playlist-container">
-        <form class="playlist-form" action="{% url 'movies:create_playlist' %}" method="post">
+        <form id="playlist-form" class="playlist-form" action="{% url 'movies:create_playlist' %}" method="post">
             {% csrf_token %}
             <label for="title">Title:</label>
             <input type="text" id="title" name="title" required>
@@ -104,5 +104,25 @@
     <footer>
         <p>&copy; Techsnap</p>
     </footer>
+    <script>
+        document.getElementById('playlist-form').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+    
+            // Your existing form submission logic, e.g., using fetch
+            fetch('{% url "movies:create_playlist" %}', {
+                method: 'POST',
+                body: new FormData(this),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Assuming the response data contains the 'id' you want to use in the URL
+                const id = data.data.id;
+    
+                // Change the URL to your desired target with the 'id' query parameter
+                window.location.href = '{% url "movies:view_playlist" %}' + `?id=${id}`;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
 </body>
 </html>
