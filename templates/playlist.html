@@ -153,7 +153,9 @@
     <div id="main-container"> <!-- Add this container -->
         <header>
             <h1>{{ data.title }}
-                <button id="add-playlist-button" onclick="addMovie()">Add Movie</button>
+                {% if is_owner %}
+                    <button id="add-playlist-button" onclick="addMovie()">Add Movie</button>
+                {% endif %}
             </h1>
         </header>
 
@@ -167,7 +169,9 @@
                         <div class="movie-card-content">
                             <h3>{{ movie.title }}</h3>
                             <p><strong>Year of Release:</strong> {{ movie.year_of_release }}</p>
-                            <button id="remove-playlist-button" onclick="removeMovie('{{ movie.id }}');event.stopPropagation()">Remove</button>
+                            {% if is_owner %}
+                                <button id="remove-playlist-button" onclick="removeMovie('{{ movie.id }}');event.stopPropagation()">Remove</button>
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}
@@ -304,7 +308,6 @@
             // Hide the popup and remove blur effect from the background
             popup.style.display = 'none';
         }
-
 
     </script>
 </body>

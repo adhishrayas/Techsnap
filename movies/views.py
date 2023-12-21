@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView,CreateAPIView,DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
+from auth_modules.permissions import IsAuthorOrReadOnly
 
 
 class UploadMovieView(CreateAPIView):
@@ -75,7 +76,8 @@ class ViewPlayListView(GenericAPIView):
         playlist = Playlists.objects.get(id = id)
         if playlist.owner == self.request.user:
             serializer = PlayListSerializer(playlist)
-            context = {"data": serializer.data}
+            context = {"data": serializer.data,
+                       "is_owner":True}
             return render(request, 'playlist.html', context)
         if playlist.is_private:
             user = self.request.user
@@ -83,13 +85,15 @@ class ViewPlayListView(GenericAPIView):
             try:
                followed = UserFollowing.objects.get(user_id = user,following_user_id = owner)
                serializer = PlayListSerializer(playlist)
-               context = {"data": serializer.data}
+               context = {"data": serializer.data,
+                          "is_owner":False}
                return render(request, 'playlist.html', context)
             except:
                 return Response({"message":"This Playlist is Private"},status=status.HTTP_401_UNAUTHORIZED)
         else:
             serializer = PlayListSerializer(playlist)
-            context = {"data": serializer.data}
+            context = {"data": serializer.data,
+                       "is_owner":False}
             return render(request, 'playlist.html', context)
         
 class MovieDetailView(APIView):
@@ -126,11 +130,12 @@ class AddtoPlaylistView(APIView):
         try:
             movie = Movies.objects.get(id=movie_id)
             playlist = Playlists.objects.get(id=playlist_id)
-
-            playlist.movies.add(movie)
-            playlist.save()
-
-            return Response({"message": "Added to playlist"})
+            if playlist.owner == self.request.user:
+              playlist.movies.add(movie)
+              playlist.save()
+              return Response({"message": "Added to playlist"})
+            else:
+              return Response({"message":"Not Authorized"})
         except Movies.DoesNotExist:
             return Response({"message": "Movie not found"}, status=400)
         except Playlists.DoesNotExist:
@@ -142,14 +147,15 @@ class RemoveFromPlaylistView(APIView):
     def get(self,request,*args, **kwargs):
         movie_id = self.request.query_params.get('movie_id')
         playlist_id = self.request.query_params.get('playlist_id')
-
         try:
             movie = Movies.objects.get(id=movie_id)
             playlist = Playlists.objects.get(id=playlist_id)
-
-            playlist.movies.remove(movie)
-            playlist.save()
-            return Response({"message": "Removed from playlist"})
+            if playlist.owner == self.request.user:
+                playlist.movies.remove(movie)
+                playlist.save()
+                return Response({"message": "Removed from playlist"})
+            else:
+                return Response({"message":"Not authorized"})
         except Movies.DoesNotExist:
             return Response({"message": "Movie not found"}, status=400)
         except Playlists.DoesNotExist:
@@ -165,3 +171,4 @@ class GetAllMovies(APIView):
             serializer = MovieBriefSerializer(m)
             data.append(serializer.data)
         return Response({"data":data})
+    

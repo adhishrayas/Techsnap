@@ -158,7 +158,7 @@
         <ul>
             {% for movie in data.liked_movies %}
                 <li class="horizontal-item">
-                    <div class="movie-card">
+                    <div class="movie-card" onclick="seeMovie('{{movie.id}}')">
                         <img src="{{ movie.movie_file }}" alt="{{ movie.title }}">
                         <div class="movie-card-content">
                             <h3>{{ movie.title }}</h3>
@@ -176,7 +176,7 @@
         <ul>
             {% for playlist in data.playlists %}
                <li class="horizontal-item">
-                   <div class="playlist-card">
+                   <div class="playlist-card" onclick="seePlayList('{{playlist.id}}')">
                        <img src = "{{ playlist.playlist_cover }}" alt = "{{playlist.title}}">
                        <div class="playlist-card-content">
                            <h3>{{ playlist.title }}</h3>
@@ -189,7 +189,17 @@
     </div>
 
     <footer>
-        <p>&copy; 2023 Your Website Name</p>
+        <p>&copy; Techsnap</p>
     </footer>
+
+    <script>
+        function seeMovie(MovieID){
+            window.location.href = '{% url "movies:about_movie" %}' + `?id=${MovieID}`
+        }
+
+        function seePlayList(playlistId) {
+            window.location.href = '{% url "movies:view_playlist" %}?id=' + playlistId;
+        }
+    </script>
 </body>
 </html>

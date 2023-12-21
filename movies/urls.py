@@ -1,5 +1,14 @@
 from django.urls import path
-from .views import UploadMovieView,MovieLikeView,CreatePlayListView,ViewPlayListView,MovieDetailView,GetPlaylistsView,AddtoPlaylistView,GetAllMovies,RemoveFromPlaylistView,DeletePlayListView
+from .views import(UploadMovieView,
+                   MovieLikeView,
+                   CreatePlayListView,
+                   ViewPlayListView,
+                   MovieDetailView,
+                   GetPlaylistsView,
+                   AddtoPlaylistView,
+                   GetAllMovies,
+                   RemoveFromPlaylistView,
+                   DeletePlayListView,)
 
 
 app_name = "movies"
