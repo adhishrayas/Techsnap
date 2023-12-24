@@ -7,7 +7,8 @@ from .views import (SignUpView,
                     ProfilePageView,
                     EditProfileView,
                     search_users,
-                    search_users_view,)
+                    search_users_view,
+                    settings_view)
 
 
 app_name = 'Authmodules'
@@ -20,5 +21,6 @@ urlpatterns = [
     path('follow',FollowUnfollowView.as_view(),name = "follow"),
     path('edit',EditProfileView.as_view(),name = "edit"),
     path('search',search_users_view,name = 'search'),
-    path('results',search_users.as_view(),name = "results")
+    path('results',search_users.as_view(),name = "results"),
+    path('settings',settings_view,name = 'settings')
 ]

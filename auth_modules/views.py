@@ -175,8 +175,8 @@ class search_users(APIView):
             return Response({"data":""})
 
     #return render(request, 'search_users.html', {'users': users})
-
-
+def settings_view(request):
+    return render(request,'settings.html')
 
 def success_view(request):
     return render(request, 'success.html')  
