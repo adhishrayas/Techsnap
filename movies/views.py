@@ -8,6 +8,74 @@ from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView,CreateAPIView,DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from auth_modules.permissions import IsAuthorOrReadOnly
+from django.http import JsonResponse
+from django.conf import settings
+import requests
+
+def search_movies(request):
+    return render(request, 'search.html')
+
+def search_results(request):
+    query = request.GET.get('query')
+    api_key = settings.API_KEY_TMDB
+    base_url_movies = 'https://api.themoviedb.org/3/search/movie'
+    base_url_tv_shows = 'https://api.themoviedb.org/3/search/tv'
+
+    params = {'api_key': api_key, 'query': query}
+
+    # Search for movies
+    response_movies = requests.get(base_url_movies, params=params)
+    data_movies = response_movies.json()
+
+    # Search for TV shows
+    response_tv_shows = requests.get(base_url_tv_shows, params=params)
+    data_tv_shows = response_tv_shows.json()
+
+    if response_movies.status_code == 200 and response_tv_shows.status_code == 200:
+        results_movies = data_movies.get('results', [])
+        results_tv_shows = data_tv_shows.get('results', [])
+
+        results_with_images = []
+
+        # Process movie results
+        for result in results_movies:
+            poster_path = result.get('poster_path')
+            if poster_path:
+                result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
+            else:
+                result['poster_url'] = None
+
+            results_with_images.append(result)
+
+        # Process TV show results
+        for result in results_tv_shows:
+            poster_path = result.get('poster_path')
+            if poster_path:
+                result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
+            else:
+                result['poster_url'] = None
+
+            results_with_images.append(result)
+
+        return JsonResponse({'results': results_with_images})
+    else:
+        return JsonResponse({'error': 'Failed to fetch data'})
+
+
+def movie_details(request, movie_id):
+    api_key = settings.API_KEY_TMDB
+    tmdb_url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&append_to_response=videos,credits'
+
+    try:
+        response = requests.get(tmdb_url)
+        response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
+        movie_details = response.json()
+    except requests.exceptions.RequestException as e:
+        # Handle API request errors, you might want to log the error or show an error page
+        return render(request, 'error.html', {'error_message': f'Error fetching movie details: {str(e)}'})
+
+    # Pass movie details to the template
+    return render(request, 'movie_details.html', {'content_details': movie_details})
 
 
 class UploadMovieView(CreateAPIView):

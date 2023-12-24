@@ -143,3 +143,4 @@ AUTH_USER_MODEL = 'auth_modules.CustomUser'
 MEDIA_URL = '/media/' 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
 handler404 = 'techsnap.views.custom_404'
+API_KEY_TMDB = '7699676f79b8c5504f59721dd2fc21c9'
