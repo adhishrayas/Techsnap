@@ -1,5 +1,13 @@
 from django.urls import path
-from .views import SignUpView,LoginView,LogoutView,success_view,FollowUnfollowView,ProfilePageView,EditProfileView
+from .views import (SignUpView,
+                    LoginView,
+                    LogoutView,
+                    success_view,
+                    FollowUnfollowView,
+                    ProfilePageView,
+                    EditProfileView,
+                    search_users,
+                    search_users_view,)
 
 
 app_name = 'Authmodules'
@@ -11,4 +19,6 @@ urlpatterns = [
     path('logout',LogoutView.as_view(),name = "logout"),
     path('follow',FollowUnfollowView.as_view(),name = "follow"),
     path('edit',EditProfileView.as_view(),name = "edit"),
+    path('search',search_users_view,name = 'search'),
+    path('results',search_users.as_view(),name = "results")
 ]

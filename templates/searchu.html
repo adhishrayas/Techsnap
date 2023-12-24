@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Bar</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #141414;
+            color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e50914;
+        }
+
+        #searchForm {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            box-sizing: border-box;
+            width: 300px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #e50914;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #b5070d;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Search</h1>
+    <form id="searchForm" action="{% url 'Authmodules:results' %}" method="get">
+        <label for="query">Search for a user:</label>
+        <input type="text" id="query" name="query" required>
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>

@@ -159,10 +159,30 @@ class EditProfileView(GenericAPIView):
     
     def get_object(self):
         return self.request.user
+class search_users(APIView):
+
+    def get(self,request,*args, **kwargs):
+        if 'query' in request.GET:
+            query = request.GET['query']
+            # Query the database for users with names similar to the entered query
+            users = CustomUser.objects.filter(username__icontains=query)
+            data = []
+            for u in users:
+                serializer = BasicProfileSerializer(u)
+                data.append(serializer.data)
+            return render(request,'user_results.html',{"data":data})
+        else:
+            return Response({"data":""})
+
+    #return render(request, 'search_users.html', {'users': users})
+
 
 
 def success_view(request):
-    return render(request, 'success.html')   
+    return render(request, 'success.html')  
+
+def search_users_view(request):
+    return render(request,'searchu.html') 
         
 
 
