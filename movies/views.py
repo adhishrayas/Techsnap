@@ -20,47 +20,70 @@ def search_results(request):
     api_key = settings.API_KEY_TMDB
     base_url_movies = 'https://api.themoviedb.org/3/search/movie'
     base_url_tv_shows = 'https://api.themoviedb.org/3/search/tv'
-
     params = {'api_key': api_key, 'query': query}
-
-    # Search for movies
     response_movies = requests.get(base_url_movies, params=params)
     data_movies = response_movies.json()
-
-    # Search for TV shows
     response_tv_shows = requests.get(base_url_tv_shows, params=params)
     data_tv_shows = response_tv_shows.json()
-
     if response_movies.status_code == 200 and response_tv_shows.status_code == 200:
         results_movies = data_movies.get('results', [])
         results_tv_shows = data_tv_shows.get('results', [])
-
         results_with_images = []
-
-        # Process movie results
         for result in results_movies:
             poster_path = result.get('poster_path')
             if poster_path:
                 result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
             else:
                 result['poster_url'] = None
-
             results_with_images.append(result)
-
-        # Process TV show results
         for result in results_tv_shows:
             poster_path = result.get('poster_path')
             if poster_path:
                 result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
             else:
                 result['poster_url'] = None
-
             results_with_images.append(result)
-
         return JsonResponse({'results': results_with_images})
     else:
         return JsonResponse({'error': 'Failed to fetch data'})
 
+def search_return(request):
+    query = request.GET.get('query')
+    api_key = settings.API_KEY_TMDB
+    base_url_movies = 'https://api.themoviedb.org/3/search/movie'
+    base_url_tv_shows = 'https://api.themoviedb.org/3/search/tv'
+    params = {'api_key': api_key, 'query': query}
+    response_movies = requests.get(base_url_movies, params=params)
+    data_movies = response_movies.json()
+    response_tv_shows = requests.get(base_url_tv_shows, params=params)
+    data_tv_shows = response_tv_shows.json()
+
+    if response_movies.status_code == 200 and response_tv_shows.status_code == 200:
+        results_movies = data_movies.get('results', [])
+        results_tv_shows = data_tv_shows.get('results', [])
+        results_with_images = []
+
+        for result in results_movies:
+            poster_path = result.get('poster_path')
+            if poster_path:
+                result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
+            else:
+                result['poster_url'] = None
+            results_with_images.append(result)
+
+        for result in results_tv_shows:
+            poster_path = result.get('poster_path')
+            if poster_path:
+                result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
+            else:
+                result['poster_url'] = None
+            results_with_images.append(result)
+
+        context = {'results': results_with_images, 'query': query}
+        return render(request, 'see_more.html', context)
+    else:
+        return JsonResponse({'error': 'Failed to fetch data'})
+    
 
 def movie_details(request, movie_id):
     api_key = settings.API_KEY_TMDB

@@ -11,7 +11,8 @@ from .views import(UploadMovieView,
                    DeletePlayListView,
                    search_movies,
                    search_results,
-                   movie_details)
+                   movie_details,
+                   search_return)
 
 
 app_name = "movies"
@@ -29,4 +30,5 @@ urlpatterns = [
     path('search/', search_movies, name='search_movies'),
     path('search_results/', search_results, name='search_results'),
     path('movie-details/<int:movie_id>/',movie_details, name='movie_details'),
+    path('movie-search-results',search_return,name = 'results')
 ]
