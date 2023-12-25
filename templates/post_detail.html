@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Detail</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #141414; /* Dark background color */
+            color: #fff; /* Light text color */
+        }
+
+        h1 {
+            color: #e50914; /* Netflix red */
+            text-align: center;
+        }
+
+        .notification-details,
+        .reply {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #282828; /* Darker background for content */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            background-color: #333; /* Header background color */
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .user {
+            font-weight: bold;
+            color: #e50914; /* Netflix red for user name */
+        }
+
+        .timestamp {
+            color: #aaa; /* Lighter text color for timestamp */
+        }
+
+        .detail-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #e50914; /* Netflix red for labels */
+        }
+
+        .detail-value {
+            margin-bottom: 15px;
+            color: #fff; /* Light text color */
+        }
+
+        .detail-value img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .replies-section {
+            margin-top: 20px;
+        }
+
+        .like-button,
+        .comment-button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .like-button:hover,
+        .comment-button:hover {
+            background-color: #e50914;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            background-color: #333; /* Footer background color */
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".like-button").on("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var postId = $(this).data("post-id");
+                var likeUrl = "{% url 'posts:Like_Post' %}?id=" + postId;
+    
+                $.ajax({
+                    url: likeUrl,
+                    method: "GET",
+                    success: function (data) {
+                        if (data && data.Message === "Succesfull") {
+                            var likesElement = $("#likes-" + postId);
+                            $.get("{% url 'posts:Get_Likes' %}?id=" + postId, function (countData) {
+                                likesElement.text("Likes: " + countData.Likes);
+                            });
+                        } else {
+                            console.error("Invalid response format or likes not successful.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error occurred while processing the like.");
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Post Detail</h1>
+
+    <div class="notification-details">
+        <div class="header">
+            <div class="user">{{ data.user }}</div>
+            <div class="timestamp">{{ data.timestamp }}</div>
+        </div>
+
+        <div class="detail-label">Content:</div>
+        <div class="detail-value">{{ data.content }}</div>
+
+        <div class="detail-label">Likes:</div>
+        <div class="detail-value">{{ data.like }}</div>
+
+        <div class="detail-label">Picture:</div>
+        <div class="detail-value">
+            {% if data.pic %}
+                <img src="{{ data.pic }}" alt="Post Image">
+            {% endif %}
+        </div>
+        
+        <div class="footer">
+            <a class="like-button" href="#" data-post-id="{{ data.id }}">Like</a>
+            <span id="likes-{{ data.id }}" class="likes"><strong>Likes:</strong> {{ data.like }}</span>
+            <span id="comment-{{data.id}}" class="comments"><strong>Comments:</strong>{{ data.comments}}</span>
+        </div>
+    </div>
+
+    <div class="replies-section">
+        <h2>Replies:</h2>
+
+        {% for reply in data.replies %}
+            <div class="reply" onclick="commentDetails('{{reply.id}}')">
+                <div class="header">
+                    <div class="user">{{ reply.user }}</div>
+                    <div class="timestamp">{{ reply.timestamp }}</div>
+                </div>
+
+                <div class="detail-label">Content:</div>
+                <div class="detail-value">{{ reply.content }}</div>
+
+                <div class="detail-label">Likes:</div>
+                <div class="detail-value">{{ reply.like }}</div>
+                
+                <div class="footer">
+                    <a class="like-button" href="#" data-post-id="{{ reply.id }}">Like</a>
+                    <span id="likes-{{ reply.id }}" class="likes"><strong>Likes:</strong> {{ reply.like }}</span>
+                    <span id="comment-{{reply.id}}" class="comments"><strong>Comments:</strong>{{ reply.comments}}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function commentDetails(replyID){
+            window.location.href = '{% url "posts:Get_Comments" %}' + `?id=${replyID}`
+        }
+    </script>
+</body>
+</html>

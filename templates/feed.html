@@ -7,21 +7,29 @@
         body {
             font-family: 'Arial', sans-serif;
             margin: 20px;
-            background-color: #f5f5f5;
+            background-color: #141414;
+            color: #fff;
         }
 
         h1 {
-            color: #333;
+            color: #e50914;
             text-align: center;
             font-size: 24px;
             margin-bottom: 20px;
         }
 
         .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 8px;
+            z-index: 1000;
         }
 
         .logout-login-button {
@@ -29,22 +37,21 @@
             text-decoration: none;
             border-radius: 5px;
             cursor: pointer;
-        }
-
-        .logout-button {
+            color: #fff;
             background-color: #e74c3c;
-            color: #fff;
-            margin-right: 10px;
         }
 
-        .login-button {
-            background-color: #3498db;
-            color: #fff;
+        .logout-login-button:hover {
+            background-color: #c0392b;
+        }
+
+        .post-container {
+            margin-top: 70px; /* Adjusted margin to account for the fixed header */
         }
 
         .post {
-            border: 1px solid #ddd;
-            background-color: #fff;
+            border: 1px solid #333;
+            background-color: #282828;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             margin-bottom: 20px;
@@ -52,7 +59,7 @@
 
         .post-header {
             padding: 12px;
-            background-color: #3498db;
+            background-color: #e50914;
             color: #fff;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
@@ -60,12 +67,12 @@
 
         .post-content {
             padding: 12px;
-            color: #333;
+            color: #fff;
         }
 
         .post-image {
             max-width: 100%;
-            max-height: 200px; /* Adjusted maximum height for the image */
+            max-height: 200px;
             height: auto;
             border-radius: 8px;
             margin-bottom: 10px;
@@ -73,7 +80,7 @@
 
         .post-footer {
             padding: 12px;
-            background-color: #ecf0f1;
+            background-color: #333;
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
             display: flex;
@@ -89,7 +96,9 @@
             color: #7f8c8d;
         }
 
-        .like-button {
+        .profile-button,
+        .like-button,
+        .comment-button {
             background-color: #3498db;
             color: #fff;
             padding: 8px 12px;
@@ -98,13 +107,10 @@
             cursor: pointer;
         }
 
-        .comment-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .profile-button:hover,
+        .like-button:hover,
+        .comment-button:hover {
+            background-color: #e50914;
         }
 
         .pagination {
@@ -117,9 +123,9 @@
             padding: 10px 15px;
             margin: 0 5px;
             text-decoration: none;
-            color: #3498db;
+            color: #e50914;
             background-color: #fff;
-            border: 1px solid #3498db;
+            border: 1px solid #e50914;
             border-radius: 5px;
             transition: background-color 0.3s;
             font-weight: bold;
@@ -127,16 +133,14 @@
         }
 
         .pagination a:hover {
-            background-color: #3498db;
+            background-color: #e50914;
             color: #fff;
         }
 
         .pagination .current {
-            background-color: #3498db;
+            background-color: #e50914;
             color: #fff;
         }
-
-       
     </style>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
@@ -167,56 +171,65 @@
             });
         });
     </script>
-    
 </head>
 <body>
     <div class="header">
-        <h1>Feed</h1>
+        <h1>Techsnap</h1>
         <div>
             {% if user.is_authenticated %}
-                <a class="logout-login-button logout-button" href="{% url 'Authmodules:logout' %}">Logout</a>
+                <a class="logout-login-button" href="{% url 'Authmodules:logout' %}">Logout</a>
+                <a class="profile-button" href="{% url 'Authmodules:profiles' %}">Profile</a>
             {% else %}
-                <a class="logout-login-button login-button" href="{% url 'Authmodules:login' %}">Login</a>
+                <a class="logout-login-button" href="{% url 'Authmodules:login' %}">Login</a>
             {% endif %}
         </div>
     </div>
 
-    {% for post in results.results %}
-        <div class="post">
-            <div class="post-header">
-                <strong>ID:</strong> {{ post.id }} | <strong>User:</strong> {{ post.user }}
+    <div class="post-container">
+        {% for post in results.results %}
+            <div class="post" onclick="postDetails('{{post.id}}')">
+                <div class="post-header">
+                    <strong>Posted by:</strong> {{ post.user }}
+                </div>
+                <div class="post-content">
+                    {{ post.content }}
+                </div>
+
+                {% if post.pic %}
+                    <img class="post-image" src="{{ post.pic }}" alt="Post Image">
+                {% endif %}
+
+                <div class="post-footer">
+                    <span id="likes-{{ post.id }}" class="likes"><strong>Likes:</strong> {{ post.like }}</span> | 
+                    <span id="comment-{{post.id}}" class="comments"><strong>Comments:</strong>{{ post.comments}}</span> |
+                    <span class="timestamp"><strong>Time:</strong> {{ post.timestamp }}</span>
+                    <a class="like-button" href="#" data-post-id="{{ post.id }}">Like</a>
+                </div>
             </div>
-            <div class="post-content">
-                {{ post.content }}
-            </div>
+        {% endfor %}
 
-            {% if post.pic %}
-                <img class="post-image" src="{{ post.pic }}" alt="Post Image">
-            {% endif %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if results.previous %}
+                    <a href="{{ results.previous }}">Previous</a>
+                {% endif %}
 
-            <div class="post-footer">
-                <span id="likes-{{ post.id }}" class="likes"><strong>Likes:</strong> {{ post.like }}</span> |
-                <span class="timestamp"><strong>Timestamp:</strong> {{ post.timestamp }}</span>
-                <a href="{% url 'posts:Get_Comments'  %}" class="comment-button">Comment</a>
-                <a class="like-button" href="#" data-post-id="{{ post.id }}">Like</a>
-            </div>
-        </div>
-    {% endfor %}
+                <span class="current">
+                    Page {{ results.number }} of {{ results.num_pages }}.
+                </span>
 
-    <div class="pagination">
-        <span class="step-links">
-            {% if results.previous %}
-                <a href="{{ results.previous }}">Previous</a>
-            {% endif %}
-
-            <span class="current">
-                Page {{ results.number }} of {{ results.num_pages }}.
+                {% if results.next %}
+                    <a href="{{ results.next }}">Next</a>
+                {% endif %}
             </span>
-
-            {% if results.next %}
-                <a href="{{ results.next }}">Next</a>
-            {% endif %}
-        </span>
+        </div>
     </div>
+
+    <script>
+
+        function postDetails(postID){
+            window.location.href = '{% url "posts:Get_Comments" %}' + `?id=${postID}`
+        }
+    </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework.generics import ListAPIView,CreateAPIView
+from rest_framework.generics import ListAPIView,CreateAPIView,GenericAPIView
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -18,7 +18,7 @@ class FeedView(ListAPIView):
     serializer_class = PostSerializer
     pagination_class = PostPagination
     permission_classes = (AllowAny,)
-    queryset = Notification.objects.all()
+    queryset = Notification.objects.filter(parent_post__isnull = True)
     
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
@@ -79,13 +79,12 @@ class GetLikesView(APIView):
 class GetCommentsView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get_comments_recursive(self, parent_post):
+    def get_comments(self, parent_post):
         comments = Notification.objects.filter(parent_post=parent_post)
         comment_data = []
         for comment in comments:
             serializer = PostSerializer(comment)
             serializer_data = serializer.data
-            serializer_data["replies"] = self.get_comments_recursive(comment)
             comment_data.append(serializer_data)
         return comment_data
 
@@ -94,9 +93,9 @@ class GetCommentsView(APIView):
         parent_post = Notification.objects.get(id=parent_id)
         
         comment_data = PostSerializer(parent_post).data
-        comment_data["replies"] = self.get_comments_recursive(parent_post)
-
-        return Response({"data": comment_data}, status=status.HTTP_200_OK)
+        comment_data["replies"] = self.get_comments(parent_post)
+        #return Response({"data":comment_data})
+        return render(request,'post_detail.html',{"data": comment_data})
 
 class GetCommentCount(APIView):
     permission_classes = (IsAuthenticated,)
@@ -105,3 +104,13 @@ class GetCommentCount(APIView):
         id = self.request.query_params.get('id')
         post = Notification.objects.get(id = id)
         return Notification.objects.filter(parent_post = post).count()
+    
+class PostDetailView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PostSerializer
+
+    def get(self,request,*args, **kwargs):
+        id = self.request.query_params.get('id')
+        post = Notification.objects.get(id = id)
+        serializer = PostSerializer(post)
+        return render(request,'post_detail.html',{"data":serializer.data})

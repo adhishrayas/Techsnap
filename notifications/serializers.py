@@ -5,12 +5,15 @@ from .models import Notification,Likes
 class PostSerializer(ModelSerializer):
     like = SerializerMethodField()
     user = SerializerMethodField()
+    comments = SerializerMethodField()
     class Meta:
         model = Notification
-        fields = ("id","user","content","timestamp","like","pic","parent_post")
+        fields = ("id","user","content","timestamp","like","pic","parent_post","comments")
     
     def get_like(self,obj):
         return Likes.objects.filter(post_id = obj.id).count()
+    def get_comments(self,obj):
+        return Notification.objects.filter(parent_post = obj.id).count()
     def get_user(self, obj):
         user = obj.user 
         return user.username if user else None
