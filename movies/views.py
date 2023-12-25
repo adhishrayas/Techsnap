@@ -68,8 +68,12 @@ def search_return(request):
     base_url_movies = 'https://api.themoviedb.org/3/search/movie'
     base_url_tv_shows = 'https://api.themoviedb.org/3/search/tv'
     params = {'api_key': api_key, 'query': query}
+    
+    # Fetch movie results
     response_movies = requests.get(base_url_movies, params=params)
     data_movies = response_movies.json()
+    
+    # Fetch TV show results
     response_tv_shows = requests.get(base_url_tv_shows, params=params)
     data_tv_shows = response_tv_shows.json()
 
@@ -78,6 +82,7 @@ def search_return(request):
         results_tv_shows = data_tv_shows.get('results', [])
         results_with_images = []
 
+        # Add content type to movie results
         for result in results_movies:
             poster_path = result.get('poster_path')
             if poster_path:
@@ -87,20 +92,21 @@ def search_return(request):
             result['content_type'] = 'movie'
             results_with_images.append(result)
 
+        # Add content type to TV show results
         for result in results_tv_shows:
             poster_path = result.get('poster_path')
             if poster_path:
-                result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
+               result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
             else:
-                result['poster_url'] = None
+               result['poster_url'] = None
             result['content_type'] = 'tv'
+            result['title'] = result.get('name', '')  # Use 'name' instead of 'title' for TV shows
             results_with_images.append(result)
 
-        context = {'results': results_with_images, 'query': query}
+        context = {'api_response': {'results': results_with_images}}
         return render(request, 'see_more.html', context)
     else:
         return JsonResponse({'error': 'Failed to fetch data'})
-    
 
 @api_view(['GET'])
 def movie_details(request):

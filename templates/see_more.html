@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie and Web Series Search</title>
+    <title>Search Results</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -15,15 +15,6 @@
         h1 {
             text-align: center;
             color: #e50914;
-        }
-
-        #searchForm {
-            text-align: center;
-            margin-bottom: 20px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Center the form items */
         }
 
         #results {
@@ -41,6 +32,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s;
             background-color: #333;
+            cursor: pointer;
         }
 
         .result-card:hover {
@@ -52,122 +44,31 @@
             height: auto;
             margin-bottom: 10px;
         }
-
-        /* Add styles for the modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-
-        .modal-content {
-            background-color: #333;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            border-radius: 8px;
-            color: #fff;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: #fff;
-            text-decoration: none;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
-    <h1>Movie and Web Series Search</h1>
-    <form id="searchForm">
-        <label for="query" style="color: #fff;">Search for a movie or web series:</label>
-        <input type="text" id="query" name="query" required>
-        <button type="submit" style="background-color: #e50914; color: #fff;">Search</button>
-    </form>
+    <h1>Search Results</h1>
 
     <div id="results">
-        {% for result in results %}
-            <div class="result-card" data-id="{{ result.id }}">
+        <!-- Results will be dynamically inserted here using Django template tags -->
+        {% for result in api_response.results %}
+            <div class="result-card" onclick="handleResultClick('{{ result.id }}','{{result.content_type}}')" data-id="{{ result.id }}">
                 <p><strong>{{ result.title }}</strong></p>
                 <p>Release Date: {{ result.release_date }}</p>
                 <p>{{ result.overview }}</p>
-                {% if result.poster_url %}
-                    <img class="result-poster" src="{{ result.poster_url }}" alt="Result Poster">
-                {% endif %}
+                <img class="result-poster" src="{{ result.poster_url }}" alt="{{ result.title }}">
             </div>
         {% endfor %}
     </div>
 
-    <!-- Add a modal for displaying detailed information -->
-    <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="modalContent"></div>
-        </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        $(document).ready(function () {
-            var apiKey = '{{ settings.API_KEY_TMDB }}';
-            $('#searchForm').submit(function (e) {
-                e.preventDefault();
-                var query = $('#query').val();
-                $.get("{% url 'movies:search_results' %}", { query: query, api_key: apiKey }, function (data) {
-                    displayResults(data.results);
-                });
-            });
-
-            function displayResults(results) {
-                var resultsDiv = $('#results');
-                resultsDiv.empty();
-
-                if (results.length > 0) {
-                    for (var i = 0; i < results.length; i++) {
-                        var result = results[i];
-                        var resultHtml = '<div class="result-card" data-id="' + result.id + '">';
-                        resultHtml += '<p><strong>' + result.title + '</strong></p>';
-                        resultHtml += '<p>Release Date: ' + result.release_date + '</p>';
-                        resultHtml += '<p>' + result.overview + '</p>';
-
-                        // Check if a poster URL is available
-                        if (result.poster_url) {
-                            resultHtml += '<img class="result-poster" src="' + result.poster_url + '" alt="Result Poster">';
-                        }
-
-                        resultHtml += '</div>';
-                        resultsDiv.append(resultHtml);
-                    }
-
-                    // Attach click event to movie cards
-                    $('.result-card').on('click', function () {
-                        var resultId = $(this).data('id');
-                        window.location.href = "{% url 'movies:movie_details' 0 %}".replace('0', resultId);
-                    });
-                } else {
-                    resultsDiv.append('<p>No results found.</p>');
-                }
-            }
-        });
-        $(document).on('click', '.result-card', function () {
-            var resultId = $(this).data('id');
-            window.location.href = "{% url 'movies:movie_details' 0 %}".replace('0', resultId);
-        });
+        // Additional JavaScript for interactivity
+        // You can add more functionality based on your requirements
+        // For example, handling click events, showing/hiding elements, etc.
+        function handleResultClick(movieID,movieType){
+            window.location.href = '{% url "movies:movie_details" %}' + `?id=${movieID}`+`&type=${movieType}`
+        }
+        
     </script>
 </body>
 </html>
