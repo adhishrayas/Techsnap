@@ -146,6 +146,7 @@
         
         <div class="footer">
             <a class="like-button" href="#" data-post-id="{{ data.id }}">Like</a>
+            <button id = "comment-button" onclick="comment('{{data.id}}')">Comment</a>
             <span id="likes-{{ data.id }}" class="likes"><strong>Likes:</strong> {{ data.like }}</span>
             <span id="comment-{{data.id}}" class="comments"><strong>Comments:</strong>{{ data.comments}}</span>
         </div>
@@ -179,6 +180,9 @@
     <script>
         function commentDetails(replyID){
             window.location.href = '{% url "posts:Get_Comments" %}' + `?id=${replyID}`
+        }
+        function comment(ID){
+            window.location.href = '{% url "posts:Post Create" %}' + `?id=${ID}`
         }
     </script>
 </body>
