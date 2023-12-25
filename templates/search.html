@@ -72,7 +72,7 @@
             max-width: 100%;
             height: auto;
             margin-right: 10px;
-            max-height:150px;
+            max-height: 150px;
         }
     
         #seeMoreButton {
@@ -145,8 +145,9 @@
                         var result = results[i];
 
                         // Check if the title is defined and not null
-                        if (result.title !== undefined && result.title !== null) {
-                            var resultHtml = '<div class="result-card" data-id="' + result.id + '">';
+                        if (result.title !== undefined ) {
+                            var contenttype = result.content_type
+                            var resultHtml = '<div class="result-card" data-id="' + result.id + '" data-content-type="' + contenttype + '">';
                             resultHtml += '<p><strong>' + result.title + '</strong></p>';
                             resultHtml += '<p>Release Date: ' + (result.release_date || 'N/A') + '</p>';
                             resultHtml += '<p>' + (result.overview || 'No overview available.') + '</p>';
@@ -162,7 +163,8 @@
 
                     $('.result-card').click(function () {
                         var resultId = $(this).data('id');
-                        window.location.href = "{% url 'movies:movie_details' 0 %}".replace('0', resultId);
+                        var contentType = $(this).data('content-type'); 
+                        window.location.href = "{% url 'movies:movie_details' %}" + `?type=${contentType}` + `&id=${resultId}`;
                     });
 
                     // Position the dynamic search results just below the search bar
@@ -190,16 +192,16 @@
                 searchResultsDiv.empty();
                 for (var i = 0; i < results.length; i++) {
                     var result = results[i];
-                    // Check if the title is defined and not null
-                    if (result.title !== undefined && result.title !== null) {
-                        var resultItemHtml = '<div class="result-item" data-id="' + result.id + '">' +
-                            '<img class="result-poster" src="' + (result.poster_url || '') + '" alt="Result Poster">' +
-                            '<div>' +
-                                '<p style="margin: 0;">' + result.title + '</p>' +
-                                '<p style="margin: 0; font-size: 12px;">Release Date: ' + (result.release_date || 'N/A') + '</p>' +
-                            '</div>' +
-                        '</div>';
-                        searchResultsDiv.append(resultItemHtml);
+                    if (result.title !== undefined ) {
+                        var contentType = result.content_type;
+                        var resultHtml = '<div class="result-item" data-id="' + result.id + '" data-content-type="' + contentType + '">';
+                        resultHtml += '<img class="result-poster" src="' + (result.poster_url || '') + '" alt="Result Poster">';
+                        resultHtml += '<div>';
+                        resultHtml += '<p style="margin: 0;">' + result.title + '</p>';
+                        resultHtml += '<p style="margin: 0; font-size: 12px;">Release Date: ' + (result.release_date || 'N/A') + '</p>';
+                        resultHtml += '</div>';
+                        resultHtml += '</div>';
+                        searchResultsDiv.append(resultHtml); // Corrected variable name
                     }
                 }
 
@@ -209,10 +211,9 @@
                 // Attach click event to each result item
                 $('.result-item').click(function () {
                     var resultId = $(this).data('id');
-                    window.location.href = "{% url 'movies:movie_details' 0 %}".replace('0', resultId);
+                    var contentType = $(this).data('content-type'); 
+                    window.location.href = "{% url 'movies:movie_details' %}" + `?type=${contentType}` + `&id=${resultId}`;
                 });
-
-                // Show the "See More" button when there are more results
                 if (results.length > 5) {
                     seeMoreButton.show();
                 } else {

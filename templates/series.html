@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ content_details.name }} Details</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #141414;
+            color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e50914;
+        }
+
+        #detailsContainer {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #detailsContainer img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .section {
+            margin-top: 20px;
+        }
+
+        .credits {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .credit-item {
+            width: 48%;
+            margin-bottom: 10px;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        #videos,
+        #seasons {
+            margin-top: 20px;
+        }
+
+        .video-item,
+        .season-item {
+            margin-bottom: 10px;
+        }
+
+        .episode-item {
+            margin-bottom: 5px;
+        }
+
+        .season-button {
+            background-color: #e50914;
+            color: #fff;
+            padding: 8px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .season-content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ content_details.name }} Details</h1>
+    
+    <div id="detailsContainer">
+
+        <section class="section">
+            <h2>Overview</h2>
+            <p>{{ content_details.overview }}</p>
+        </section>
+
+        <section class="section">
+            <h2>Genres</h2>
+            <ul>
+                {% for genre in content_details.genres %}
+                    <li>{{ genre.name }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>Production Companies</h2>
+            <ul>
+                {% for company in content_details.production_companies %}
+                    <li>{{ company.name }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="section" id="videos">
+            <h2>Videos</h2>
+            <ul>
+                {% for video in content_details.videos.results %}
+                    <li class="video-item">
+                        <strong>{{ video.name }}</strong>
+                        <br>
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/{{ video.key }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="section" id="seasons">
+            <h2>Seasons</h2>
+            {% for season in content_details.seasons %}
+                <div class="season-item">
+                    <button class="season-button" onclick="toggleSeason('{{ season.name }}')">Season {{ season.season_number }}</button>
+                    <div class="season-content" id="season-{{ season.name }}">
+                        <ul class="episode-list">
+                            {% for episode in season.episodes %}
+                                <li class="episode-item">
+                                    <strong>{{ episode.name }}</strong>
+                                    <br>
+                                    {% if episode.videos.results %}
+                                        <iframe width="560" height="315" src="https://www.youtube.com/embed/{{ episode.videos.results.0.key }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                    {% else %}
+                                        No video available
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+
+        <section class="section">
+            <h2>Credits</h2>
+            <div class="credits">
+                <div class="credit-item">
+                    <h3>Created By</h3>
+                    <ul>
+                        {% for creator in content_details.created_by %}
+                            <li>{{ creator.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="credit-item">
+                    <h3>Cast</h3>
+                    <ul>
+                        {% for cast_member in content_details.credits.cast %}
+                            <li>{{ cast_member.name }} as {{ cast_member.character }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="credit-item">
+                    <h3>Crew</h3>
+                    <ul>
+                        {% for crew_member in content_details.credits.crew %}
+                            <li>{{ crew_member.name }} - {{ crew_member.job }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="section">
+            <h2>Additional Details</h2>
+            <ul>
+                <li><strong>First Air Date:</strong> {{ content_details.first_air_date }}</li>
+                <li><strong>Last Air Date:</strong> {{ content_details.last_air_date }}</li>
+                <li><strong>Number of Seasons:</strong> {{ content_details.number_of_seasons }}</li>
+                <li><strong>Number of Episodes:</strong> {{ content_details.number_of_episodes }}</li>
+                <li><strong>Status:</strong> {{ content_details.status }}</li>
+                <li><strong>Vote Average:</strong> {{ content_details.vote_average }}</li>
+            </ul>
+        </section>
+
+    </div>
+
+    <script>
+        function toggleSeason(seasonName) {
+            var seasonContent = document.getElementById('season-' + seasonName);
+            seasonContent.style.display = (seasonContent.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>

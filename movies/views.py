@@ -9,6 +9,7 @@ from rest_framework.generics import GenericAPIView,CreateAPIView,DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from auth_modules.permissions import IsAuthorOrReadOnly
 from django.http import JsonResponse
+from rest_framework.decorators import api_view
 from django.conf import settings
 import requests
 
@@ -21,28 +22,41 @@ def search_results(request):
     base_url_movies = 'https://api.themoviedb.org/3/search/movie'
     base_url_tv_shows = 'https://api.themoviedb.org/3/search/tv'
     params = {'api_key': api_key, 'query': query}
+    
+    # Fetch movie results
     response_movies = requests.get(base_url_movies, params=params)
     data_movies = response_movies.json()
+    
+    # Fetch TV show results
     response_tv_shows = requests.get(base_url_tv_shows, params=params)
     data_tv_shows = response_tv_shows.json()
+
     if response_movies.status_code == 200 and response_tv_shows.status_code == 200:
         results_movies = data_movies.get('results', [])
         results_tv_shows = data_tv_shows.get('results', [])
         results_with_images = []
+
+        # Add content type to movie results
         for result in results_movies:
             poster_path = result.get('poster_path')
             if poster_path:
                 result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
             else:
                 result['poster_url'] = None
+            result['content_type'] = 'movie'
             results_with_images.append(result)
+
+        # Add content type to TV show results
         for result in results_tv_shows:
             poster_path = result.get('poster_path')
             if poster_path:
-                result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
+               result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
             else:
-                result['poster_url'] = None
+               result['poster_url'] = None
+            result['content_type'] = 'tv'
+            result['title'] = result.get('name', '')  # Use 'name' instead of 'title' for TV shows
             results_with_images.append(result)
+
         return JsonResponse({'results': results_with_images})
     else:
         return JsonResponse({'error': 'Failed to fetch data'})
@@ -69,6 +83,7 @@ def search_return(request):
                 result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
             else:
                 result['poster_url'] = None
+            result['content_type'] = 'movie'
             results_with_images.append(result)
 
         for result in results_tv_shows:
@@ -77,6 +92,7 @@ def search_return(request):
                 result['poster_url'] = f'https://image.tmdb.org/t/p/w500{poster_path}'
             else:
                 result['poster_url'] = None
+            result['content_type'] = 'tv'
             results_with_images.append(result)
 
         context = {'results': results_with_images, 'query': query}
@@ -85,20 +101,51 @@ def search_return(request):
         return JsonResponse({'error': 'Failed to fetch data'})
     
 
-def movie_details(request, movie_id):
+@api_view(['GET'])
+def movie_details(request):
     api_key = settings.API_KEY_TMDB
-    tmdb_url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&append_to_response=videos,credits'
-
+    content_type = request.GET.get('type')
+    content_id = request.GET.get('id')
+    
+    if content_type == 'movie':
+        tmdb_url = f'https://api.themoviedb.org/3/movie/{content_id}?api_key={api_key}&append_to_response=videos,credits'
+    elif content_type == 'tv':
+        tmdb_url = f'https://api.themoviedb.org/3/tv/{content_id}?api_key={api_key}&append_to_response=videos,credits'
+    else:
+        return Response({'error_message': 'Invalid content type'})
+    
     try:
         response = requests.get(tmdb_url)
         response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
-        movie_details = response.json()
+        content_details = response.json()
+
+        if content_type == 'tv':
+            # Add videos for each episode
+            for season in content_details.get('seasons', []):
+                season_number = season.get('season_number')
+                if season_number is not None:
+                    season_url = f'https://api.themoviedb.org/3/tv/{content_id}/season/{season_number}?api_key={api_key}&append_to_response=videos'
+                    season_response = requests.get(season_url)
+                    season_response.raise_for_status()
+                    season_data = season_response.json()
+                    season['episodes'] = season_data.get('episodes', [])
+
+                     # Add videos for each episode
+                    for episode in season['episodes']:
+                        episode_number = episode.get('episode_number')
+                        if episode_number is not None:
+                            episode_url = f'https://api.themoviedb.org/3/tv/{content_id}/season/{season_number}/episode/{episode_number}?api_key={api_key}&append_to_response=videos'
+                            episode_response = requests.get(episode_url)
+                            episode_response.raise_for_status()
+                            episode_data = episode_response.json()
+                            episode['videos'] = episode_data.get('videos', {})
+                            
+            return render(request, 'series.html', {'content_details': content_details})
     except requests.exceptions.RequestException as e:
         # Handle API request errors, you might want to log the error or show an error page
-        return render(request, 'error.html', {'error_message': f'Error fetching movie details: {str(e)}'})
+        return Response({'error_message': f'Error fetching content details: {str(e)}'})
 
-    # Pass movie details to the template
-    return render(request, 'movie_details.html', {'content_details': movie_details})
+    return Response({'content_details': content_details})
 
 
 class UploadMovieView(CreateAPIView):
