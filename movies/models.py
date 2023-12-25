@@ -11,23 +11,16 @@ class Movies(models.Model):
         editable = False,
         primary_key = True
     )
-    title = models.CharField(max_length = 255,blank = False)
-    uploaded_by = models.ForeignKey(UserModel,on_delete = models.CASCADE)
-    movie_file = models.FileField(upload_to='movies/')
-    description = models.TextField(blank = True,null = True)
-    year_of_release = models.IntegerField(blank = True,null = True)
     rating = models.IntegerField(default = 0)
     rated_by = models.IntegerField(default = 0)
-    views = models.IntegerField(default = 0)
-
+    content_id = models.IntegerField(default = 0)
+    content_type = models.CharField(max_length = 255,blank = True,null = True)
     @property
     def total_rating(self):
         if self.rated_by == 0:
             return 0
         return self.rating/self.rated_by
-    
-    def __str__(self):
-        return self.title
+
 
 class MoviesLikes(models.Model):
     id = models.UUIDField(

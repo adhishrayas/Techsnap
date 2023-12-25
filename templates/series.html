@@ -12,14 +12,35 @@
             color: #fff;
         }
 
-        h1 {
+        header {
             text-align: center;
-            color: #e50914;
+            background-color: #333;
+            padding: 10px;
+            margin-bottom: 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        h1 {
+            margin: 0;
+            color: #fff;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #333;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
         }
 
         #detailsContainer {
             max-width: 800px;
-            margin: 0 auto;
+            margin: 70px auto 20px; /* Adjusted margin to account for fixed header */
         }
 
         #detailsContainer img {
@@ -71,11 +92,177 @@
         .season-content {
             display: none;
         }
+
+        #playlistPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #282828;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto; /* Add a scrollbar if content exceeds max-height */
+        }
+
+        .playlist-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .playlist-list-item {
+            margin-bottom: 10px;
+        }
+
+        .close-popup {
+            cursor: pointer;
+            color: #fff;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        #rating-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #282828;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .star {
+            font-size: 30px;
+            color: #ccc;
+            cursor: pointer;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #e50914; /* Netflix red */
+        }
+
+        #reaction-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #282828;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .emoji {
+            font-size: 24px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .emoji:hover {
+            color: #e50914; /* Netflix red */
+        }
+
+        .like-button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .like-button:hover {
+            background-color: #e50914;
+        }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        var selectedRating = 0;
+        $(document).ready(function () {
+            $(".like-button").on("click", function (e) {
+                e.preventDefault();
+
+                var movieId = $(this).data("post-id");
+                var likeUrl = "{% url 'movies:like_unlike_movie' %}?id=" + `${movieId}`;
+
+                $.ajax({
+                    url: likeUrl,
+                    method: "GET",
+                    success: function (data) {
+                        if (data && data.Message === "Success") {
+                            var likesElement = $("#likes-" + movieId);
+                            $.get("{% url 'movies:get_likes' %}?id=" + `${movieId}`, function (countData) {
+                                likesElement.text("Likes: " + countData.Likes);
+                            });
+                        } else {
+                            console.error("Invalid response format or likes not successful.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error occurred while processing the like.");
+                    }
+                });
+            });
+        });
+        function showRatingStars() {
+            const popup = document.getElementById('rating-popup');
+            popup.style.display = 'block';
+    
+            // Clear previous star ratings
+            document.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
+    
+            // Set the selected rating if previously rated
+            if (selectedRating > 0) {
+                document.querySelector(`.star:nth-child(${selectedRating})`).classList.add('active');
+            }
+        }
+    
+        function closeRatingPopup() {
+            const popup = document.getElementById('rating-popup');
+            popup.style.display = 'none';
+        }
+    
+        function rateMovie(rating) {
+            selectedRating = rating;
+            alert(`You rated the movie ${rating} stars!`); // You can replace this with your actual rating logic
+    
+            // Update UI to reflect the selected rating
+            document.querySelectorAll('.star').forEach((star, index) => {
+                star.classList.remove('active');
+                if (index < rating) {
+                    star.classList.add('active');
+                }
+            });
+    
+            // Close the rating popup
+            closeRatingPopup();
+        }
+    
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('rate-button').addEventListener('click', showRatingStars);
+        });
+    </script>
 </head>
 <body>
-    <h1>{{ content_details.name }} Details</h1>
-    
+    <header>
+        <h1>{{ content_details.name }} Details</h1>
+        <button id="playlist-button" onclick="showPlaylists()">Add To Playlist</button>
+        <a class="like-button" href="#" data-post-id="{{ content_details.id }}">Like</a>
+        <span id="likes-{{ content_details.id }}" class="likes"><strong>Likes:</strong> {{ content_details.like }}</span> |
+        <button id="rate-button" onclick="showRatingStars()">Rate</button>
+        <button id="reaction-button" onclick="showReactionPopup()">Reaction</button>
+    </header>
     <div id="detailsContainer">
 
         <section class="section">
@@ -180,11 +367,127 @@
         </section>
 
     </div>
+    <footer>
+        <p>&copy; Techsnap. All rights reserved.</p>
+    </footer>
+    <div id="playlistPopup">
+        <ul id="play-list" class="playlist-list"></ul>
+        <span class="close-popup" onclick="closePopup()">Close</span>
+    </div>
 
+    <div id="rating-popup">
+        <span class="star" onclick="rateMovie(1)">&#9733;</span>
+        <span class="star" onclick="rateMovie(2)">&#9733;</span>
+        <span class="star" onclick="rateMovie(3)">&#9733;</span>
+        <span class="star" onclick="rateMovie(4)">&#9733;</span>
+        <span class="star" onclick="rateMovie(5)">&#9733;</span>
+        <button onclick="closeRatingPopup()">Close</button>
+    </div>
+
+    <div id="reaction-popup">
+        <span class="emoji" onclick="selectEmoji('😍')">😍</span>
+        <span class="emoji" onclick="selectEmoji('😂')">😂</span>
+        <span class="emoji" onclick="selectEmoji('😎')">😎</span>
+        <span class="emoji" onclick="selectEmoji('👍')">👍</span>
+        <span class="emoji" onclick="selectEmoji('🙌')">🙌</span>
+        <button onclick="closeReactionPopup()">Close</button>
+    </div>
     <script>
         function toggleSeason(seasonName) {
             var seasonContent = document.getElementById('season-' + seasonName);
             seasonContent.style.display = (seasonContent.style.display === 'block') ? 'none' : 'block';
+        }
+        function showPlaylists() {
+            const url = '{% url "movies:get_playlists" %}';
+            fetch(url)
+                .then(response => response.json())
+                .then(data => showPlaylistPopup(data))
+                .catch(error => console.error('Error fetching playlist data:', error));
+        }
+
+        function showPlaylistPopup(playlists) {
+            const popup = document.getElementById('playlistPopup');
+            const PlayList = document.getElementById('play-list');
+            PlayList.innerHTML = ''; // Clear previous content
+
+            playlists.data.forEach(playlist => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('playlist-list-item');
+
+                const playlistCard = document.createElement('div');
+                playlistCard.classList.add('playlist-card');
+
+                const PlaylistCover = document.createElement('img');
+                PlaylistCover.src = playlist.playlist_cover;
+                PlaylistCover.alt = playlist.title;
+
+                const PlaylistCardContent = document.createElement('div');
+                PlaylistCardContent.classList.add('playlist-card-content');
+
+                const PlayListTitle = document.createElement('h3');
+                PlayListTitle.textContent = playlist.title;
+
+                const MovieCount = document.createElement('p');
+                MovieCount.innerHTML = `<strong>Movies:</strong> ${playlist.movie_count}`;
+
+                const addButton = document.createElement('button');
+                addButton.textContent = '+ Add to this Playlist';
+                addButton.addEventListener('click', function (event) {
+                    addMovie(playlist.id, addButton);
+                });
+                PlaylistCardContent.appendChild(PlayListTitle);
+                PlaylistCardContent.appendChild(MovieCount);
+                PlaylistCardContent.appendChild(addButton);
+                playlistCard.appendChild(PlaylistCover);
+                playlistCard.appendChild(PlaylistCardContent);
+                listItem.appendChild(playlistCard);
+                PlayList.appendChild(listItem);
+            });
+
+            popup.style.display = 'block';
+        }
+
+        function addMovie(playlistID, addButton) {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const type = urlParams.get('type');
+            const url = '{% url "movies:add_to_playlist" %}' + `?movie_id=${MovieId}&type=${type}&playlist_id=${playlistID}`
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                    if (data.message === 'Added to playlist') {
+                        addButton.style.backgroundColor = '#00cc00';
+                        addButton.style.color = '#000000';
+                        addButton.textContent = 'Added';
+                        addButton.disabled = true;
+                    }
+                })
+                .catch(error => console.error('Error adding to playlist:', error));
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('playlistPopup');
+
+            // Hide the popup and remove blur effect from the background
+            popup.style.display = 'none';
+        }
+
+        
+        function showReactionPopup() {
+            const popup = document.getElementById('reaction-popup');
+            popup.style.display = 'block';
+        }
+
+        function closeReactionPopup() {
+            const popup = document.getElementById('reaction-popup');
+            popup.style.display = 'none';
+        }
+
+        function selectEmoji(emoji) {
+            alert(`You selected the reaction: ${emoji}`); // You can replace this with your actual logic
+            closeReactionPopup();
         }
     </script>
 </body>

@@ -1,19 +1,30 @@
 from rest_framework.serializers import ModelSerializer,ReadOnlyField,SerializerMethodField
 from .models import Movies,Playlists
-
+import requests
+from django.conf import settings
 
 class MovieSerializer(ModelSerializer):
     total_rating = ReadOnlyField()
+    movie_photo = SerializerMethodField()
+    
     class Meta:
         model = Movies
-        fields = "__all__"
+        fields = ("id","rating","rated_by","content_id","content_type","total_rating","movie_photo")
         extra_kwargs = {"id":{"read_only":True}}
+    
+    def get_movie_photo(self,obj):
+        api_key = settings.API_KEY_TMDB
+        content_type = obj.content_type
+        content_id = obj.content_id
+        if content_type == 'movie':
+                tmdb_url = f'https://api.themoviedb.org/3/movie/{content_id}?api_key={api_key}&append_to_response=videos,credits'
+                response = requests.get(tmdb_url)
+                response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
+                content_details = response.json()
+                poster_path = content_details['poster_path']
+                return f'https://image.tmdb.org/t/p/w500{poster_path}'
 
-class MovieBriefSerializer(ModelSerializer):
 
-    class Meta:
-        model = Movies
-        fields = ("title","movie_file","year_of_release","id")
 class PlayListSerializer(ModelSerializer):
     movies = MovieSerializer(many = True,required = False)
 
@@ -42,7 +53,16 @@ class PlaylistMiniSerializer(ModelSerializer):
     
     def get_playlist_cover(self,obj):
         movie = obj.movies.all().first()
+        api_key = settings.API_KEY_TMDB
         if movie:
-           return movie.movie_file.url
+           content_type = movie.content_type
+           content_id = movie.content_id
+           if content_type == 'movie':
+                tmdb_url = f'https://api.themoviedb.org/3/movie/{content_id}?api_key={api_key}&append_to_response=videos,credits'
+                response = requests.get(tmdb_url)
+                response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
+                content_details = response.json()
+                poster_path = content_details['poster_path']
+                return f'https://image.tmdb.org/t/p/w500{poster_path}'
         else:
             return None

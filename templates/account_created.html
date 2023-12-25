@@ -9,31 +9,33 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #141414; /* Dark background similar to Netflix */
             margin: 0;
             padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            color: #fff; /* White text color */
         }
 
         .success-container {
-            background-color: #fff;
+            background-color: #e50914; /* Netflix red */
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             width: 300px;
             text-align: center;
         }
 
         h2 {
-            color: #4caf50;
+            color: #4caf50; /* Green color for success message */
         }
 
         ul {
             list-style: none;
             padding: 0;
+            color: #ccc; /* Light gray text color for details */
         }
 
         li {
@@ -52,5 +54,14 @@
             <li><strong>Phone Number:</strong> {{ phone }}</li>
         </ul>
     </div>
+    <script>
+        function redirectAfterDelay() {
+            var redirectURL = '{% url "Authmodules:profiles" %}';  
+            setTimeout(function () {
+                window.location.href = redirectURL;
+            }, 3000); 
+        }
+        window.onload = redirectAfterDelay;
+    </script>
 </body>
 </html>

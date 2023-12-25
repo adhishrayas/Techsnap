@@ -154,7 +154,7 @@
         <header>
             <h1>{{ data.title }}
                 {% if is_owner %}
-                    <button id="add-playlist-button" onclick="addMovie()">Add Movie</button>
+                    <button id="add-playlist-button" onclick="searchMovie()">Add Movie</button>
                 {% endif %}
             </h1>
         </header>
@@ -164,8 +164,8 @@
             <h2>Movies</h2>
             <div class="scroll-container">
                 {% for movie in data.movies %}
-                    <div class="movie-card" id="movie-{{ movie.id }}" onclick="redirect('{{movie.id}}')">
-                        <img src="{{ movie.movie_file }}" alt="{{ movie.title }}">
+                    <div class="movie-card" id="movie-{{ movie.id }}" onclick="redirect('{{movie.content_id}}','{{movie.content_type}}')">
+                        <img src="{{movie.movie_photo}}" alt="{{ movie.title }}">
                         <div class="movie-card-content">
                             <h3>{{ movie.title }}</h3>
                             <p><strong>Year of Release:</strong> {{ movie.year_of_release }}</p>
@@ -182,26 +182,17 @@
             <p>&copy; Techsnap</p>
         </footer>
     </div> <!-- Close the container -->
-
+   <!--
     <div id="moviePopup">
         <ul id="movieList" class="movie-list" ></ul>
         <span class="close-popup" onclick="closePopup()">Close</span>
     </div>
+-->
     <script>
-        function addMovie() {
-            const mainContainer = document.getElementById('main-container');
-            mainContainer.classList.add('blur');
 
-            // Use Django template tag to generate the URL dynamically
-            const url = '{% url "movies:get_all_movies" %}';
-    
-            // Make a GET request to fetch movie data and render the list
-            fetch(url)
-                .then(response => response.json())
-                .then(data => showMoviePopup(data))
-                .catch(error => console.error('Error fetching movie data:', error));
+        function redirect(movieID,contentType){
+            window.location.href = '{% url "movies:movie_details" %}' +`?id=${movieID}&type=${contentType}`
         }
-
         function removeMovie(movieId) {
             const queryString = window.location.search;
             const urlParams = new URLSearchParams(queryString);
@@ -226,89 +217,9 @@
                 .catch(error => console.error('Error removing from playlist:', error));
         }
         
-        function addToPlaylist(movieId,addButton) {
-            event.stopPropagation()
-            const queryString = window.location.search;
-            const urlParams = new URLSearchParams(queryString);
-            const playlistId = urlParams.get('id')
-            const addtp = '{% url "movies:add_to_playlist" %}';
-            const url = addtp+`?movie_id=${movieId}&&playlist_id=${playlistId}`;
-    
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                console.log(data.message); // Log the response from the server
-                // You can add additional logic here if needed
-                if (data.message === 'Added to playlist') {
-                    addButton.style.backgroundColor = '#00cc00'; // Green color
-                    addButton.style.color = '#000000'; 
-                    addButton.textContent = 'Added';
-                    addButton.disabled = true; // Optionally disable the button
-                }
-                })
-                .catch(error => console.error('Error adding to playlist:', error));
+        function searchMovie() {
+            window.location.href = '{% url "movies:search_movies" %}'        
         }
-
-        function showMoviePopup(movies) {
-            const popup = document.getElementById('moviePopup');
-            const movieList = document.getElementById('movieList');
-            movieList.innerHTML = ''; // Clear previous content
-            
-            movies.data.forEach(movie => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('movie-list-item');
-    
-                const movieCard = document.createElement('div');
-                movieCard.classList.add('movie-card');
-    
-                const movieImage = document.createElement('img');
-                movieImage.src = movie.movie_file;
-                movieImage.alt = movie.title;
-    
-                const movieCardContent = document.createElement('div');
-                movieCardContent.classList.add('movie-card-content');
-    
-                const movieTitle = document.createElement('h3');
-                movieTitle.textContent = movie.title;
-    
-                const releaseYear = document.createElement('p');
-                releaseYear.innerHTML = `<strong>Year of Release:</strong> ${movie.year_of_release}`;
-
-                const addButton = document.createElement('button');
-                addButton.textContent = '+ Add to Playlist';
-                addButton.addEventListener('click', function(event) {
-                    addToPlaylist(movie.id,addButton,event.stopPropagation())
-                });
-                movieCard.addEventListener('click', function (event) {
-                    redirect(movie.id);
-                });
-                movieCardContent.appendChild(movieTitle);
-                movieCardContent.appendChild(releaseYear);
-                movieCardContent.appendChild(addButton);
-                movieCard.appendChild(movieImage);
-                movieCard.appendChild(movieCardContent);
-    
-                listItem.appendChild(movieCard);
-                movieList.appendChild(listItem);
-            });
-    
-            popup.style.display = 'block'; // Show the popup
-        }
-
-        function redirect(movieID){
-            window.location.href = '{% url "movies:about_movie" %}' + `?id=${movieID}`;
-        }
-
-        function closePopup() {
-            const mainContainer = document.getElementById('main-container');
-            mainContainer.classList.remove('blur');
-
-            const popup = document.getElementById('moviePopup');
-    
-            // Hide the popup and remove blur effect from the background
-            popup.style.display = 'none';
-        }
-
     </script>
 </body>
 </html>

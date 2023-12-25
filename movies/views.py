@@ -1,6 +1,7 @@
 from django.shortcuts import render
+from django.db import transaction
 from .models import MoviesLikes,Movies,Playlists
-from .serializers import MovieSerializer,PlayListSerializer,MovieBriefSerializer,PlaylistMiniSerializer
+from .serializers import PlayListSerializer,PlaylistMiniSerializer
 from auth_modules.models import UserFollowing
 from rest_framework import status
 from rest_framework.response import Response
@@ -118,7 +119,9 @@ def movie_details(request):
         response = requests.get(tmdb_url)
         response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
         content_details = response.json()
-
+        movie,created = Movies.objects.get_or_create(content_id = content_id,content_type = content_type)
+        count = MoviesLikes.objects.filter(liked_on = movie).count()
+        content_details['likes'] = count
         if content_type == 'tv':
             # Add videos for each episode
             for season in content_details.get('seasons', []):
@@ -144,38 +147,45 @@ def movie_details(request):
     except requests.exceptions.RequestException as e:
         # Handle API request errors, you might want to log the error or show an error page
         return Response({'error_message': f'Error fetching content details: {str(e)}'})
-
-    return Response({'content_details': content_details})
-
-
-class UploadMovieView(CreateAPIView):
-    serializer_class = MovieSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get(self,request,*args, **kwargs):
-        user = self.request.user
-        if user.is_uploader:
-            return Response({"message":"Upload your Movie"},status = status.HTTP_200_OK)
-        else:
-            return Response({"message":"Not Authorized"},status=status.HTTP_401_UNAUTHORIZED)
-        
-    def perform_create(self, serializer):
-        serializer.save(uploaded_by = self.request.user)
+    #return Response({'content_details':content_details})
+    return render(request,'movie_details.html',{'content_details': content_details})
 
 class MovieLikeView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    def get(self, request, *args, **kwargs):
+        content_id = self.request.query_params.get('id')
+        content_type = self.request.query_params.get('type')
+
+        try:
+            with transaction.atomic():
+                movie, created = Movies.objects.get_or_create(
+                    content_id=content_id, content_type="movie"
+                )
+
+                try:
+                    like = MoviesLikes.objects.get(
+                        liked_on=movie, liked_by=self.request.user
+                    )
+                    like.delete()
+                    return Response({"Message": "Success"})
+                except MoviesLikes.DoesNotExist:
+                    MoviesLikes.objects.create(liked_on=movie, liked_by=self.request.user)
+                    return Response({"Message": "Success"})
+        except Movies.DoesNotExist:
+            return Response({"Message": "Movie not found"}, status=404)
+        except Exception as e:
+            return Response({"Message": f"An error occurred: {str(e)}"}, status=500)
+
+class GetMovieLikesView(APIView):
+    permission_classes=(IsAuthenticated,)
+
     def get(self,request,*args, **kwargs):
         id = self.request.query_params.get('id')
-        movie = Movies.objects.get(id = id)
-        try:
-          like = MoviesLikes.objects.get(liked_on= movie,liked_by = self.request.user)
-          like.delete()
-          return Response({"Message":"Unliked"})
-        except:
-          MoviesLikes.objects.create(liked_on = movie,liked_by = self.request.user)
-          return Response({"Message":"Liked"})
-  
+        movie = Movies.objects.get(content_id = id)
+        count = MoviesLikes.objects.filter(liked_on = movie).count()
+        return Response({"Likes":count})
+
 class CreatePlayListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PlayListSerializer
@@ -234,17 +244,7 @@ class ViewPlayListView(GenericAPIView):
                        "is_owner":False}
             return render(request, 'playlist.html', context)
         
-class MovieDetailView(APIView):
-    permission_classes = (IsAuthenticated,)
 
-    def get(self,request,*args, **kwargs):
-        id = self.request.query_params.get('id')
-        movie = Movies.objects.get(id = id)
-        movie.views += 1
-        movie.save()
-        serializer = MovieSerializer(movie)
-        return render(request,'movie_detail.html',{"data":serializer.data})
-        return Response({"data":serializer.data},status=status.HTTP_200_OK)
 
 class GetPlaylistsView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -263,10 +263,10 @@ class AddtoPlaylistView(APIView):
 
     def get(self, request, *args, **kwargs):
         movie_id = self.request.query_params.get('movie_id')
+        type = self.request.query_params.get('type')
         playlist_id = self.request.query_params.get('playlist_id')
-
         try:
-            movie = Movies.objects.get(id=movie_id)
+            movie = Movies.objects.get(content_id=movie_id,content_type = type)
             playlist = Playlists.objects.get(id=playlist_id)
             if playlist.owner == self.request.user:
               playlist.movies.add(movie)
@@ -300,13 +300,3 @@ class RemoveFromPlaylistView(APIView):
             return Response({"message": "Playlist not found"}, status=400)
         
 
-class GetAllMovies(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self,request,*args, **kwargs):
-        data = []
-        for m in Movies.objects.all():
-            serializer = MovieBriefSerializer(m)
-            data.append(serializer.data)
-        return Response({"data":data})
-    

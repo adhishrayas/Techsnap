@@ -96,6 +96,7 @@
             color: #7f8c8d;
         }
 
+        .create-button,
         .profile-button,
         .like-button,
         .comment-button {
@@ -106,7 +107,8 @@
             border-radius: 5px;
             cursor: pointer;
         }
-
+        
+        .create-button:hover,
         .profile-button:hover,
         .like-button:hover,
         .comment-button:hover {
@@ -147,7 +149,7 @@
         $(document).ready(function () {
             $(".like-button").on("click", function (e) {
                 e.preventDefault();
-    
+                e.stopPropagation();
                 var postId = $(this).data("post-id");
                 var likeUrl = "{% url 'posts:Like_Post' %}?id=" + postId;
     
@@ -179,6 +181,7 @@
             {% if user.is_authenticated %}
                 <a class="logout-login-button" href="{% url 'Authmodules:logout' %}">Logout</a>
                 <a class="profile-button" href="{% url 'Authmodules:profiles' %}">Profile</a>
+                <a class="create-button" href = "{% url "posts:Post Create" %}">Create</a>
             {% else %}
                 <a class="logout-login-button" href="{% url 'Authmodules:login' %}">Login</a>
             {% endif %}

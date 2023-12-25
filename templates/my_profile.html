@@ -126,7 +126,7 @@
         .movie-card-content h3,
         .playlist-card-content h3 {
             margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.2 rem;
             font-weight: bold;
             color: #fff; /* Light text color */
         }
@@ -382,16 +382,15 @@
            <ul>
                {% for movie in data.liked_movies %}
                     <li class="horizontal-item">
-                       <div class="movie-card" onclick = "seeMovie('{{movie.id}}')">
-                           {% if movie.movie_file %}
-                              <img src="{{ movie.movie_file }}" alt="{{ movie.title }}">
+                       <div class="movie-card" onclick="MovieDetail('{{movie.id}}','{{movie.type}}')">
+                           {% if movie.poster_path %}
+                           <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.content_details.original_title }} Poster">
                            {% else %}
                               <div class="default-card"></div>
                            {% endif %}
                            <div class="movie-card-content">
-                             <h3>{{ movie.title }}</h3>
-                             <p><strong>Total Rating:</strong> {{ movie.total_rating }}</p>
-                             <p><strong>Year of Release:</strong> {{ movie.year_of_release }}</p>
+                             <h3>{{ movie.original_title }}</h3>
+                             <p><strong>Year of Release:</strong> {{ movie.release_date }}</p>
                            </div>
                        </div>
                     </li>
@@ -467,9 +466,6 @@
     <script>
         function logout(){
             window.location.href = '{% url "Authmodules:logout" %}'
-        }
-        function seeMovie(MovieID){
-            window.location.href = '{% url "movies:about_movie" %}' + `?id=${MovieID}`
         }
         function addPlaylist() {
             window.location.href = '{% url "movies:create_playlist" %}';
@@ -551,6 +547,10 @@
 
         function settings(){
             window.location.href = '{% url "Authmodules:settings" %}'
+        }
+
+        function MovieDetail(movieID,movieType){
+            window.location.href = '{% url "movies:movie_details" %}' + `?id=${movieID}`+`&type=${movieType}`
         }
         
     </script>

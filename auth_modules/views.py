@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .permissions import IsAuthorOrReadOnly
 from .models import CustomUser,UserFollowing
+from movies.models import Playlists
 # Create your views here.
 
 class SignUpView(GenericAPIView):
@@ -22,6 +23,7 @@ class SignUpView(GenericAPIView):
             "phone": None,
         }
         return render(request, 'signup.html', default_values)
+    
     def post(self,request,*args, **kwargs):
         if CustomUser.objects.filter(email = request.data.get('email')).exists():
             return render(request, 'account_exists.html')
@@ -29,13 +31,15 @@ class SignUpView(GenericAPIView):
             return render(request, 'username_taken.html')
         serializer = SignUpSerializer(data = request.data)
         serializer.is_valid()
-        serializer.save()
-        user = serializer.instance
+        user = serializer.save()
         try:
           token = Token.objects.create(user = user)
         except:
             user.delete()
             return render(request, 'unable_to_create_user.html')
+        Playlists.objects.create(owner = user,title = "Seen",about = "All the movies that you have seen!")
+        Playlists.objects.create(owner = user,title = "Watchlist",about = "What you are going to watch!")
+        Playlists.objects.create(owner = user,title = "Must Watch",about = "Must Watch!!")
         login(request,user)
         token = Token.objects.get(user = user)
         user_data = SignUpSerializer(user)
@@ -94,7 +98,6 @@ class MyProfilePageView(GenericAPIView):
     def get(self,request,*args, **kwargs):
         user = self.request.user
         serializer = ProfileSerializer(user)
-        #return Response({"data":serializer.data})
         return render(request, 'my_profile.html', {"data":serializer.data})
     
 class ProfilePageView(GenericAPIView):

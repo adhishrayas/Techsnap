@@ -1,7 +1,9 @@
+import requests
 from rest_framework.serializers import ModelSerializer,SerializerMethodField
 from .models import CustomUser,UserFollowing
-from movies.serializers import MovieSerializer,PlayListSerializer,PlaylistMiniSerializer
+from movies.serializers import PlaylistMiniSerializer
 from movies.models import MoviesLikes,Playlists
+from django.conf import settings
 
 class SignUpSerializer(ModelSerializer):
 
@@ -50,14 +52,21 @@ class ProfileSerializer(ModelSerializer):
     
     def get_liked_movies(self,obj):
         data = []
-        try:
-           liked_movies = MoviesLikes.objects.filter(liked_by = obj)
-           for l in liked_movies:
-               serializer = MovieSerializer(l.liked_on)
-               data.append(serializer.data)
-           return data
-        except:
-            return None
+        api_key = settings.API_KEY_TMDB
+        liked_movies = MoviesLikes.objects.filter(liked_by = obj)
+        for l in liked_movies:
+               content_type = l.liked_on.content_type
+               content_id = l.liked_on.content_id
+               tmdb_url = f'https://api.themoviedb.org/3/{content_type}/{content_id}?api_key={api_key}&append_to_response=videos,credits'
+               response = requests.get(tmdb_url)
+               response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
+               content_details = response.json()
+               content_details['type'] = content_type
+               data.append(content_details)
+        return data
+        #except:
+        #    print("yo")
+        #    return None
     
     def get_playlists(self,obj):
         data = []
