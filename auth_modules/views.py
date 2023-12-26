@@ -160,7 +160,7 @@ class EditProfileView(GenericAPIView):
         if 'profile_pic' in request.FILES:
             user.profile_pic = request.FILES['profile_pic']
         user.save()
-        return Response({"message":"updated"})
+        return render(request,'updated.html')
     
     def get_object(self):
         return self.request.user

@@ -27,7 +27,7 @@
         }
     
         #searchResults {
-            position: relative;
+            position: absolute;
             z-index: 1;
             background-color: #333;
             max-width: 300px;
@@ -130,6 +130,9 @@
                     $('#results').hide();
                     seeMoreButton.hide();
                 }
+                var searchFormOffset = $('#searchForm').offset();
+                searchResultsDiv.css('top', searchFormOffset.top + $('#searchForm').outerHeight());
+                searchResultsDiv.css('left', searchFormOffset.left);
             });
 
             function displayResults(results) {
