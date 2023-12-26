@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from auth_modules.models import CustomUser
 from django.contrib.auth import get_user_model
 
 UserModel = get_user_model()
@@ -62,3 +63,23 @@ class Playlists(models.Model):
     is_highlight = models.BooleanField(default = False)
     def __str__(self):
         return f'{self.owner}:-playlist{self.title}'
+
+class Ratings(models.Model):
+    id = models.UUIDField(
+        default = uuid.uuid4,
+        primary_key = True,
+        editable = False
+    )
+    rating = models.IntegerField(default = 0)
+    rated_by = models.ForeignKey(CustomUser,on_delete = models.CASCADE)
+    rated_on = models.ForeignKey(Movies,on_delete = models.CASCADE)
+
+class Reaction(models.Model):
+    id = models.UUIDField(
+        default = uuid.uuid4,
+        primary_key = True,
+        editable =False,
+    )
+    reaction = models.IntegerField(default = 0)
+    reacted_by = models.ForeignKey(CustomUser,on_delete = models.CASCADE)
+    reacted_on = models.ForeignKey(Movies,on_delete = models.CASCADE)

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db import transaction
-from .models import MoviesLikes,Movies,Playlists,MoviesDisLikes
+from .models import MoviesLikes,Movies,Playlists,MoviesDisLikes,Ratings,Reaction
 from .serializers import PlayListSerializer,PlaylistMiniSerializer
 from auth_modules.models import UserFollowing
 from rest_framework import status
@@ -108,8 +108,10 @@ def search_return(request):
     else:
         return JsonResponse({'error': 'Failed to fetch data'})
 
-@api_view(['GET'])
-def movie_details(request):
+class movie_details(APIView):
+  
+  permission_classes = (IsAuthenticated,)
+  def get(self,request,*args, **kwargs):
     api_key = settings.API_KEY_TMDB
     content_type = request.GET.get('type')
     content_id = request.GET.get('id')
@@ -128,8 +130,12 @@ def movie_details(request):
         movie,created = Movies.objects.get_or_create(content_id = content_id,content_type = content_type)
         count = MoviesLikes.objects.filter(liked_on = movie).count()
         dis_like_count = MoviesDisLikes.objects.filter(liked_on = movie).count()
+        rating,created = Ratings.objects.get_or_create(rated_by = self.request.user,rated_on = movie)
+        reaction,created = Reaction.objects.get_or_create(reacted_by = self.request.user,reacted_on = movie)
         content_details['likes'] = count
         content_details['dislikes'] = dis_like_count
+        content_details['rated'] = rating.rating
+        content_details['reacted'] = reaction.reaction
         if content_type == 'tv':
             # Add videos for each episode
             for season in content_details.get('seasons', []):
@@ -518,3 +524,29 @@ class UpcomingReleaseView(APIView):
             return render(request,'upcoming.html',results)
         except requests.exceptions.RequestException as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class RateMovieView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        content_id = self.request.query_params.get('id')
+        content_type = self.request.query_params.get('type')
+        Rating = self.request.query_params.get('rating')
+        content = Movies.objects.get(content_id = content_id,content_type = content_type)
+        rating = Ratings.objects.get(rated_by = self.request.user,rated_on = content)
+        rating.rating = Rating
+        rating.save()
+        return Response({"message":"success"})
+    
+class ReactMovieView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        content_id = self.request.query_params.get('id')
+        content_type = self.request.query_params.get('type')
+        reacted = self.request.query_params.get('reaction')
+        content = Movies.objects.get(content_id = content_id,content_type = content_type)
+        reaction = Reaction.objects.get(reacted_by = self.request.user,reacted_on = content)
+        reaction.reaction = reacted
+        reaction.save()
+        return Response({"message":"success"})

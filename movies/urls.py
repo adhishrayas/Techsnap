@@ -20,7 +20,9 @@ from .views import(
                    AddtoMustWatchPlaylistView,
                    AddtoTrackingPlaylistView,
                    TrendingMediaView,
-                   UpcomingReleaseView
+                   UpcomingReleaseView,
+                   ReactMovieView,
+                   RateMovieView,
                    )
 
 
@@ -37,7 +39,7 @@ urlpatterns = [
     path('remove_from_playlist/',RemoveFromPlaylistView.as_view(),name = 'remove_from_playlist'),
     path('search/', search_movies, name='search_movies'),
     path('search_results/',search_results, name='search_results'),
-    path('movie-details/',movie_details,name='movie_details'),
+    path('movie-details/',movie_details.as_view(),name='movie_details'),
     path('movie-search-results',search_return,name = 'results'),
     path('your_playlist/',GetYourPlayList.as_view(),name = "your_playlist"),
     path('get_dislikes/',GetMovieDisLikesView.as_view(),name = "dislikes_count"),
@@ -46,5 +48,7 @@ urlpatterns = [
     path('add_to_must/',AddtoMustWatchPlaylistView.as_view(),name = "Add_must"),
     path('add_to_track/',AddtoTrackingPlaylistView.as_view(),name = "Add_tracking"),
     path('trending/',TrendingMediaView.as_view(),name = "Trending"),
-    path('upcoming/',UpcomingReleaseView.as_view(),name = "Upcoming")
+    path('upcoming/',UpcomingReleaseView.as_view(),name = "Upcoming"),
+    path('rate/',RateMovieView.as_view(),name = "rate"),
+    path('react/',ReactMovieView.as_view(),name = "react"),
 ]
