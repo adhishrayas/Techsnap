@@ -95,23 +95,28 @@
         }
 
         #liked-button {
-            right: 10px;
+            right: 20px;
+            position:absolute
         }
 
         #disliked-button {
-            right: 70px;
+            right: 90px;
+            position:absolute
         }
 
         #seen-button {
-            right: 130px;
+            right: 190px;
+            position:absolute
         }
 
         #must-button {
-            right: 190px;
+            right: 260px;
+            position:absolute
         }
 
         #tracked-button {
-            right: 250px;
+            right: 330px;
+            position:absolute
         }
 
         #remove-button,
@@ -126,13 +131,15 @@
 </head>
 <body>
 
-<header>
-    <h1 style="color: var(--link-color);">My Playlists</h1>
-    <button id="liked-button" onclick="liked()">Liked</button>
-    <button id="disliked-button" onclick="disliked()">DisLiked</button>
-    <button id="seen-button" onclick="seen()">Seen</button>
-    <button id="must-button" onclick="must()">Must</button>
-    <button id="tracked-button" onclick="track()">Tracked</button>
+<header style="display: flex; justify-content: space-between; align-items: center; background-color: var(--container-bg-color); padding: 10px;">
+        <h1 style="color: var(--link-color); margin: 0;">My Playlists</h1>
+        <div>
+            <button id="liked-button" onclick="liked()">Liked</button>
+            <button id="disliked-button" onclick="disliked()">DisLiked</button>
+            <button id="seen-button" onclick="seen()">Seen</button>
+            <button id="must-button" onclick="must()">Must</button>
+            <button id="tracked-button" onclick="track()">Tracked</button>
+        </div>
 </header>
 
 <div class="profile">

@@ -259,6 +259,7 @@
             background-color: #b5070d; /* Darker shade of red on hover */
         }
 
+        #notifications-button,
         #settings-button {
             background-color: #e50914; /* Netflix red */
             color: white;
@@ -270,6 +271,7 @@
             margin-bottom: 10px;
         }
 
+        #notifications-button:hover,
         #settings-button:hover {
             background-color: #b5070d; /* Darker shade of red on hover */
         }
@@ -362,6 +364,7 @@
                   <button id="search-movie-button" onclick="search()">Search</button>
                   <button id="search-user-button" onclick="searchuser()">Search User</button>
                   <button id="settings-button" onclick="settings()">Settings</button>
+                  <button id="notifications-button" onclick="notifications()">Notifications</button>
                {% endif %}
            </h1>
         </header>
@@ -558,6 +561,10 @@
 
         function allPlaylist(){
             window.location.href = '{% url "movies:my_playlists" %}'
+        }
+
+        function notifications(){
+            window.location.href = '{% url "posts:unseen_likes" %}'
         }
         
     </script>

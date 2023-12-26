@@ -31,6 +31,6 @@ class Likes(models.Model):
     post_id = models.ForeignKey(Notification,on_delete = models.CASCADE)
     liked_by = models.ForeignKey(CustomUser,on_delete= models.CASCADE)
     liked_at = models.DateTimeField(auto_now_add = True)
-
+    seen = models.BooleanField(default = False)
     def __str__(self):
         return str(self.liked_by)

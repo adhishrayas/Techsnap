@@ -18,3 +18,8 @@ class PostSerializer(ModelSerializer):
         user = obj.user 
         return user.username if user else None
     
+class LikesSerializer(ModelSerializer):
+
+    class Meta:
+        model = Likes
+        fields = "__all__"

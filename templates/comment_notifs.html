@@ -1,0 +1,129 @@
+<!-- templates/replied_posts.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replied Posts</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #141414;
+            color: #fff;
+        }
+
+        header {
+            text-align: center;
+            background-color: #333;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .replied-item {
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .replied-item:hover {
+            background-color: #555;
+        }
+
+        .clickable {
+            cursor: pointer;
+            color: #e50914;
+            text-decoration: underline;
+        }
+
+        #repliedPostsContainer {
+            margin-top: 60px; /* Adjusted margin to account for fixed header */
+        }
+
+        #button-container {
+            display: flex;
+            gap: 10px;
+            margin-right: 50px; /* Adjusted margin to provide space on the right */
+        }
+
+        #profile-button,
+        #feed-button,
+        #notificationsButton {
+            background-color: #e50914;
+            color: #fff;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Comment Notifications</h1>
+        <div id="button-container">
+            <button id="notificationsButton" onclick="handleNotificationsButtonClick()">Like Notifications</button>
+            <button id="profile-button" onclick="profile()">Profile</button>
+            <button id="feed-button" onclick="feed()">Feed</button>
+        </div>
+    </header>
+
+    <div id="repliedPostsContainer">
+        {% for item in data %}
+            <div class="replied-item" onclick="handleClick('{{ item.replied_by }}', '{{ item.replied_on }}', '{{ item.replier_id }}', '{{ item.replied_at }}')">
+                <p>
+                    <span class="clickable" onclick="handleUserClick('{{ item.replier_id }}')">{{ item.replied_by }}</span>
+                    replied on
+                    <span class="clickable" onclick="handlePostClick('{{ item.replied_on }}')">post</span>
+                    at {{ item.replied_at }}
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // JavaScript functions for handling clicks
+        function handleUserClick(replierId) {
+            window.location.href = '{% url "Authmodules:profiles" %}' + `?id=${replierId}`
+        }
+
+        function handlePostClick(repliedOn) {
+            window.location.href = '{% url "posts:post_detail" %}' + `?id=${repliedOn}` 
+        }
+
+        function handleClick(repliedBy, repliedOn, replierId, repliedAt) {
+            alert(repliedBy + ' replied on your post at ' + repliedOn + ' by ' + replierId + ' at ' + repliedAt);
+            // Add your custom logic here
+        }
+
+        function handleNotificationsButtonClick() {
+            window.location.href = '{% url "posts:unseen_likes" %}'
+        }
+
+        function profile(){
+            window.location.href = '{% url "Authmodules:profiles" %}'
+        }
+
+        function feed(){
+            window.location.href = '{% url "posts:Feed" %}'
+        }
+    </script>
+</body>
+</html>

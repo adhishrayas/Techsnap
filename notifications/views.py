@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from auth_modules.models import CustomUser
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.pagination import PageNumberPagination
 from .serializers import PostSerializer
@@ -114,3 +115,41 @@ class PostDetailView(GenericAPIView):
         post = Notification.objects.get(id = id)
         serializer = PostSerializer(post)
         return render(request,'post_detail.html',{"data":serializer.data})
+    
+class UnseenLikesView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,*args, **kwargs):
+        user = self.request.user
+        posts = Notification.objects.filter(user = user)
+        for p in posts:
+           # try:
+            likes = Likes.objects.filter(post_id = p).exclude(liked_by = user)
+            data = []
+            for l in likes:
+                    obj = {}
+                    by = l.liked_by
+                    obj['liked_by'] = by.username
+                    obj['liked_at'] = l.liked_at
+                    obj['liked_on'] = l.post_id.id
+                    obj['liked_by_id'] = by.id
+                    data.append(obj)
+            return render(request,'notifications.html',{"data":data})
+           # except:
+            #    return Response({"data":None})
+                
+class CommentsNotifsView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,*args, **kwargs):
+        user = self.request.user
+        posts = Notification.objects.filter(user = user)
+        data = []
+        for p in posts:
+            replies = Notification.objects.filter(parent_post = p)
+            for r in replies:
+                obj = {}
+                obj['replied_by'] = r.user.username
+                obj['replier_id'] = r.user.id
+                obj['replied_on'] = p.id
+                obj['replied_at'] = r.timestamp
+                data.append(obj)
+        return render(request,'comment_notifs.html',{"data":data})

@@ -71,7 +71,8 @@ class ProfileSerializer(ModelSerializer):
     def get_playlists(self,obj):
         data = []
         #try:
-        playlists = Playlists.objects.filter(owner = obj).filter(is_private = False)
+        excluded_titles = ['Seen','Liked','DisLiked','Tracking','Must Watch']
+        playlists = Playlists.objects.filter(owner = obj,is_private=False).exclude(title__in = excluded_titles)
         for p in playlists:
                 serializer = PlaylistMiniSerializer(p)
                 data.append(serializer.data)

@@ -96,6 +96,8 @@
             color: #7f8c8d;
         }
 
+        .searchuser-button,
+        .search-button,
         .timeline-button,
         .trending-button,
         .create-button,
@@ -110,6 +112,8 @@
             cursor: pointer;
         }
         
+        .searchuser-button,
+        .search-button:hover,
         .timeline-button:hover,
         .trending-button:hover,
         .create-button:hover,
@@ -188,6 +192,8 @@
                 <a class="create-button" href = "{% url "posts:Post Create" %}">Create</a>
                 <a class="trending-button" href = "{% url "movies:Trending" %}">Trending</a>
                 <a class="trending-button" href = "{% url "movies:Upcoming" %}">Timeline</a>
+                <a class="search-button" href = "{% url "movies:search_movies"%}">Search Movies</a>
+                <a class="searchuser-button" href = "{% url "Authmodules:search" %}">Search User</a>
             {% else %}
                 <a class="logout-login-button" href="{% url 'Authmodules:login' %}">Login</a>
             {% endif %}
