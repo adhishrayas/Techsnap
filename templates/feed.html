@@ -96,6 +96,7 @@
             color: #7f8c8d;
         }
 
+        .trending-button,
         .create-button,
         .profile-button,
         .like-button,
@@ -108,6 +109,7 @@
             cursor: pointer;
         }
         
+        .trending-button:hover,
         .create-button:hover,
         .profile-button:hover,
         .like-button:hover,
@@ -182,6 +184,7 @@
                 <a class="logout-login-button" href="{% url 'Authmodules:logout' %}">Logout</a>
                 <a class="profile-button" href="{% url 'Authmodules:profiles' %}">Profile</a>
                 <a class="create-button" href = "{% url "posts:Post Create" %}">Create</a>
+                <a class="trending-button" href = "{% url "movies:Trending" %}">Trending</a>
             {% else %}
                 <a class="logout-login-button" href="{% url 'Authmodules:login' %}">Login</a>
             {% endif %}

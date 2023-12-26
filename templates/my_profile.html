@@ -138,6 +138,7 @@
             color: #ccc; /* Light gray text color */
         }
 
+        #all-playlist-button,
         #add-playlist-button {
             background-color: #e50914; /* Netflix red */
             color: white;
@@ -149,6 +150,7 @@
             margin-bottom: 10px;
         }
 
+        #all-playlist-button,
         #add-playlist-button:hover {
             background-color: #b5070d; /* Darker shade of red on hover */
         }
@@ -402,6 +404,7 @@
            Playlists
            {% if is_owner %}
               <button id="add-playlist-button" onclick="addPlaylist()" >Add Playlist</button>
+              <button id="all-playlist-button" onclick="allPlaylist()" >All Playlists</button>
            {% endif %}
         </h2>
         <div class="horizontal-scroll">
@@ -551,6 +554,10 @@
 
         function MovieDetail(movieID,movieType){
             window.location.href = '{% url "movies:movie_details" %}' + `?id=${movieID}`+`&type=${movieType}`
+        }
+
+        function allPlaylist(){
+            window.location.href = '{% url "movies:my_playlists" %}'
         }
         
     </script>

@@ -35,6 +35,19 @@ class MoviesLikes(models.Model):
     def __str__(self):
         return str(self.liked_on)
 
+class MoviesDisLikes(models.Model):
+    id = models.UUIDField(
+        default = uuid.uuid4,
+        primary_key= True,
+        editable = False
+    )
+    liked_by = models.ForeignKey(UserModel,on_delete = models.CASCADE)
+    liked_on = models.ForeignKey(Movies,on_delete = models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add = True)
+
+    def __str__(self):
+        return str(self.liked_on)
+
 class Playlists(models.Model):
     id = models.UUIDField(
         default = uuid.uuid4,

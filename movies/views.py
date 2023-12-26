@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db import transaction
-from .models import MoviesLikes,Movies,Playlists
+from .models import MoviesLikes,Movies,Playlists,MoviesDisLikes
 from .serializers import PlayListSerializer,PlaylistMiniSerializer
 from auth_modules.models import UserFollowing
 from rest_framework import status
@@ -127,7 +127,9 @@ def movie_details(request):
         content_details = response.json()
         movie,created = Movies.objects.get_or_create(content_id = content_id,content_type = content_type)
         count = MoviesLikes.objects.filter(liked_on = movie).count()
+        dis_like_count = MoviesDisLikes.objects.filter(liked_on = movie).count()
         content_details['likes'] = count
+        content_details['dislikes'] = dis_like_count
         if content_type == 'tv':
             # Add videos for each episode
             for season in content_details.get('seasons', []):
@@ -148,8 +150,10 @@ def movie_details(request):
                             episode_response.raise_for_status()
                             episode_data = episode_response.json()
                             episode['videos'] = episode_data.get('videos', {})
-                            
+            
+            #return Response({"data":content_details})
             return render(request, 'series.html', {'content_details': content_details})
+                    
     except requests.exceptions.RequestException as e:
         # Handle API request errors, you might want to log the error or show an error page
         return Response({'error_message': f'Error fetching content details: {str(e)}'})
@@ -166,17 +170,53 @@ class MovieLikeView(APIView):
         try:
             with transaction.atomic():
                 movie, created = Movies.objects.get_or_create(
-                    content_id=content_id, content_type="movie"
+                    content_id=content_id, content_type=content_type
                 )
-
+                playlist = Playlists.objects.get(owner = self.request.user,title = "Liked")
                 try:
                     like = MoviesLikes.objects.get(
                         liked_on=movie, liked_by=self.request.user
                     )
                     like.delete()
+                    print("saved")
+                    playlist.movies.add(movie)
+                    playlist.save()
                     return Response({"Message": "Success"})
                 except MoviesLikes.DoesNotExist:
+                    playlist.movies.remove(movie)
+                    playlist.save()
                     MoviesLikes.objects.create(liked_on=movie, liked_by=self.request.user)
+                    return Response({"Message": "Success"})
+        except Movies.DoesNotExist:
+            return Response({"Message": "Movie not found"}, status=404)
+        except Exception as e:
+            return Response({"Message": f"An error occurred: {str(e)}"}, status=500)
+        
+class MovieDisLikeView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        content_id = self.request.query_params.get('id')
+        content_type = self.request.query_params.get('type')
+
+        try:
+            with transaction.atomic():
+                movie, created = Movies.objects.get_or_create(
+                    content_id=content_id, content_type=content_type
+                )
+                playlist = Playlists.objects.get(owner = self.request.user,title = "DisLiked")
+                try:
+                    Dislike = MoviesDisLikes.objects.get(
+                        liked_on=movie, liked_by=self.request.user
+                    )
+                    Dislike.delete()
+                    playlist.movies.remove(movie)
+                    playlist.save()
+                    return Response({"Message": "Success"})
+                except MoviesDisLikes.DoesNotExist:
+                    MoviesDisLikes.objects.create(liked_on=movie, liked_by=self.request.user)
+                    playlist.movies.add(movie)
+                    playlist.save()
                     return Response({"Message": "Success"})
         except Movies.DoesNotExist:
             return Response({"Message": "Movie not found"}, status=404)
@@ -188,9 +228,21 @@ class GetMovieLikesView(APIView):
 
     def get(self,request,*args, **kwargs):
         id = self.request.query_params.get('id')
-        movie = Movies.objects.get(content_id = id)
+        type = self.request.query_params.get('type')
+        movie = Movies.objects.get(content_id = id,content_type=type)
         count = MoviesLikes.objects.filter(liked_on = movie).count()
         return Response({"Likes":count})
+    
+class GetMovieDisLikesView(APIView):
+    permission_classes=(IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        id = self.request.query_params.get('id')
+        type = self.request.query_params.get('type')
+        movie = Movies.objects.get(content_id = id,content_type=type)
+        count = MoviesDisLikes.objects.filter(liked_on = movie).count()
+        return Response({"Likes":count})
+    
 
 class CreatePlayListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -252,17 +304,32 @@ class ViewPlayListView(GenericAPIView):
         
 
 
+class GetPlaylistsTemplateView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        user = self.request.user
+        excluded_titles = ['Seen','Liked','DisLiked','Tracking','Must Watch']
+        playlists = Playlists.objects.filter(owner = user).exclude(title__in= excluded_titles)
+        data = []
+        for p in playlists:
+            playlist_data = PlaylistMiniSerializer(p)
+            data.append(playlist_data.data)
+        return render(request,'my_playlists.html',{"data":data})
+    
 class GetPlaylistsView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self,request,*args, **kwargs):
         user = self.request.user
-        playlists = Playlists.objects.filter(owner = user)
+        excluded_titles = ['Seen','Liked','DisLiked','Tracking','Must Watch']
+        playlists = Playlists.objects.filter(owner = user).exclude(title__in= excluded_titles)
         data = []
         for p in playlists:
             playlist_data = PlaylistMiniSerializer(p)
             data.append(playlist_data.data)
-        return Response({"data":data},status=status.HTTP_200_OK)
+        return Response({"data":data})
+    
     
 class AddtoPlaylistView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -304,5 +371,105 @@ class RemoveFromPlaylistView(APIView):
             return Response({"message": "Movie not found"}, status=400)
         except Playlists.DoesNotExist:
             return Response({"message": "Playlist not found"}, status=400)
-        
+
+class GetYourPlayList(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        type = self.request.query_params.get('type')
+        user = self.request.user
+        playlist = Playlists.objects.get(owner = user,title = type)
+        serializer =PlayListSerializer(playlist)
+        return render(request,'playlist.html',{"data":serializer.data})
+
+class AddtoSeenPlaylistView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, *args, **kwargs):
+        movie_id = self.request.query_params.get('movie_id')
+        type = self.request.query_params.get('type')
+        try:
+            movie = Movies.objects.get(content_id=movie_id,content_type = type)
+            playlist = Playlists.objects.get(title = "Seen",owner = self.request.user)
+            playlist.movies.add(movie)
+            playlist.save()
+            return Response({"message": "Added to playlist"})
+        except Movies.DoesNotExist:
+            return Response({"message": "Movie not found"}, status=400)
+        except Playlists.DoesNotExist:
+            return Response({"message": "Playlist not found"}, status=400)
+
+class AddtoMustWatchPlaylistView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, *args, **kwargs):
+        movie_id = self.request.query_params.get('movie_id')
+        type = self.request.query_params.get('type')
+        try:
+            movie = Movies.objects.get(content_id=movie_id,content_type = type)
+            playlist = Playlists.objects.get(title = "Must Watch",owner = self.request.user)
+            playlist.movies.add(movie)
+            playlist.save()
+            return Response({"message": "Added to playlist"})
+        except Movies.DoesNotExist:
+            return Response({"message": "Movie not found"}, status=400)
+        except Playlists.DoesNotExist:
+            return Response({"message": "Playlist not found"}, status=400)
+
+class AddtoTrackingPlaylistView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, *args, **kwargs):
+        movie_id = self.request.query_params.get('movie_id')
+        try:
+            movie = Movies.objects.get(content_id=movie_id,content_type = "tv")
+            playlist = Playlists.objects.get(title = "Tracking",owner = self.request.user)
+            playlist.movies.add(movie)
+            playlist.save()
+            return Response({"message": "Added to playlist"})
+        except Movies.DoesNotExist:
+            return Response({"message": "Movie not found"}, status=400)
+        except Playlists.DoesNotExist:
+            return Response({"message": "Playlist not found"}, status=400)
+
+class TrendingMediaView(APIView):
+    def get(self, request, *args, **kwargs):
+        api_key = settings.API_KEY_TMDB
+        trending_movies_url = f'https://api.themoviedb.org/3/trending/movie/week?api_key={api_key}'
+        trending_series_url = f'https://api.themoviedb.org/3/trending/tv/week?api_key={api_key}'
+
+        try:
+            trending_movies_response = requests.get(trending_movies_url)
+            trending_series_response = requests.get(trending_series_url)
+            if trending_movies_response.status_code == 200 and trending_series_response.status_code == 200:
+                trending_movies_data = trending_movies_response.json()
+                trending_series_data = trending_series_response.json()
+                trending_movies = [
+                    {
+                        'id':movie['id'],
+                        'title': movie['title'],
+                        'overview': movie['overview'],
+                        'release_date': movie['release_date'],
+                        'image_url': f"https://image.tmdb.org/t/p/w500/{movie['poster_path']}",
+                        'content_type':'movie',
+                    }
+                    for movie in trending_movies_data['results']
+                ]
+
+                trending_series = [
+                    {
+                        'id': series['id'],
+                        'name': series['name'],
+                        'overview': series['overview'],
+                        'first_air_date': series['first_air_date'],
+                        'image_url': f"https://image.tmdb.org/t/p/w500/{series['poster_path']}",
+                        'content_type':'tv'
+                    }
+                    for series in trending_series_data['results']
+                ]
+                trending_media = {'trending_movies': trending_movies, 'trending_series': trending_series}
+                return render(request,'trending.html',trending_media)
+                return Response(trending_media)
+            else:
+                return Response({'error': 'Failed to fetch trending media'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except Exception as e:
+            return Response({'error': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

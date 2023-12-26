@@ -173,6 +173,10 @@
             color: #e50914; /* Netflix red */
         }
 
+        .seen-button,
+        .must-button,
+        .track-button,
+        .disliked-button,
         .like-button {
             background-color: #3498db;
             color: #fff;
@@ -182,6 +186,10 @@
             cursor: pointer;
         }
 
+        .seen-button,
+        .must-button,
+        .track-button,
+        .disliked-button,
         .like-button:hover {
             background-color: #e50914;
         }
@@ -192,17 +200,18 @@
         $(document).ready(function () {
             $(".like-button").on("click", function (e) {
                 e.preventDefault();
-
-                var movieId = $(this).data("post-id");
-                var likeUrl = "{% url 'movies:like_unlike_movie' %}?id=" + `${movieId}`;
-
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                const MovieId = urlParams.get('id');
+                const type = urlParams.get('type');
+                var likeUrl = "{% url 'movies:like_unlike_movie' %}?id=" + `${MovieId}` + `&type=${type}`;
                 $.ajax({
                     url: likeUrl,
                     method: "GET",
                     success: function (data) {
                         if (data && data.Message === "Success") {
-                            var likesElement = $("#likes-" + movieId);
-                            $.get("{% url 'movies:get_likes' %}?id=" + `${movieId}`, function (countData) {
+                            var likesElement = $("#likes-" + MovieId);
+                            $.get("{% url 'movies:get_likes' %}?id=" + `${MovieId}` + `&type=${type}`, function (countData) {
                                 likesElement.text("Likes: " + countData.Likes);
                             });
                         } else {
@@ -215,6 +224,33 @@
                 });
             });
         });
+        $(document).ready(function () {
+            $(".disliked-button").on("click", function (e) {
+                e.preventDefault();
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                const MovieId = urlParams.get('id');
+                const type = urlParams.get('type');
+                const dislikeUrl = "{% url 'movies:Dislike' %}" + `?id=${MovieId}&type=${type}`;
+        
+                $.ajax({
+                    url: dislikeUrl,
+                    method: "GET",
+                    success: function (data) {
+                        console.log("Dislike Success:", data);
+                        var likesElement = $("#dislikes-" + MovieId);
+                        $.get("{% url 'movies:dislikes_count' %}?id=" + `${MovieId}` + `&type=${type}`, function (countData) {
+                            likesElement.text("DisLikes:" + countData.Likes);
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Dislike Error:", error);
+                        alert("Error occurred while processing the dislike.");
+                    }
+                });
+            });
+        });
+        
         function showRatingStars() {
             const popup = document.getElementById('rating-popup');
             popup.style.display = 'block';
@@ -260,8 +296,13 @@
         <button id="playlist-button" onclick="showPlaylists()">Add To Playlist</button>
         <a class="like-button" href="#" data-post-id="{{ content_details.id }}">Like</a>
         <span id="likes-{{ content_details.id }}" class="likes"><strong>Likes:</strong> {{ content_details.like }}</span> |
+        <a class="disliked-button" href="#" data-post-id="{{ content_details.id }}">DisLike</a>
+        <span id="dislikes-{{ content_details.id }}" class="dislikes"><strong>DisLikes:</strong> {{ content_details.like }}</span> |
         <button id="rate-button" onclick="showRatingStars()">Rate</button>
         <button id="reaction-button" onclick="showReactionPopup()">Reaction</button>
+        <button id = "seen-button" onclick="addToSeen()">Seen</button>
+        <button id = "Must-button" onclick="addToMust()">Must Watch</button>
+        <button id = "Track-button" onclick="addToTrack()">Track</button>
     </header>
     <div id="detailsContainer">
 
@@ -488,6 +529,48 @@
         function selectEmoji(emoji) {
             alert(`You selected the reaction: ${emoji}`); // You can replace this with your actual logic
             closeReactionPopup();
+        }
+
+        function addToSeen(){
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const type = urlParams.get('type');
+            const url = '{% url "movies:Add_scene" %}' + `?movie_id=${MovieId}&type=${type}`
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                })
+                .catch(error => console.error('Error adding to playlist:', error));
+        }
+
+        function addToMust(){
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const type = urlParams.get('type');
+            const url = '{% url "movies:Add_must" %}' + `?movie_id=${MovieId}&type=${type}`
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                })
+                .catch(error => console.error('Error adding to playlist:', error));
+        }
+
+        function addToTrack(){
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const type = urlParams.get('type');
+            const url = '{% url "movies:Add_tracking" %}' + `?movie_id=${MovieId}`
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                })
+                .catch(error => console.error('Error adding to playlist:', error));
         }
     </script>
 </body>
