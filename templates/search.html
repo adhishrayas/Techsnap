@@ -152,7 +152,11 @@
                             var contenttype = result.content_type
                             var resultHtml = '<div class="result-card" data-id="' + result.id + '" data-content-type="' + contenttype + '">';
                             resultHtml += '<p><strong>' + result.title + '</strong></p>';
+                            if (result.release_date !== null){
                             resultHtml += '<p>Release Date: ' + (result.release_date || 'N/A') + '</p>';
+                            }else{
+                                resultHtml += '<p>Release Date:' + (result.first_air_date) + '</p>';
+                            }
                             resultHtml += '<p>' + (result.overview || 'No overview available.') + '</p>';
 
                             if (result.poster_url) {

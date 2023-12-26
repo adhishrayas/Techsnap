@@ -193,7 +193,7 @@ class movie_details(APIView):
                             episode['synopsis'] = episode_data.get('overview', '')  # Add episode synopsis
                             episode['episode_number'] = episode_number  # Add episode number
             
-            return Response({"data":content_details})
+            #return Response({"data":content_details})
             return render(request, 'series.html', {'content_details': content_details})
                     
     except requests.exceptions.RequestException as e:
