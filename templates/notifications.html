@@ -54,6 +54,7 @@
             margin-top: 60px; /* Adjusted margin to account for fixed header */
         }
 
+        #following-button,
         #profile-button,
         #feed-button,
         #notificationsButton {
@@ -77,6 +78,12 @@
             color: #fff;
         }
 
+        #following-button{
+            left: 150px;
+            background-color: #e50914;
+            color: #fff;
+        }
+
         #notificationsButton {
             right: 10px;
             background-color: #e50914;
@@ -90,6 +97,7 @@
         <h1>Like Notifications</h1>
         <button id="feed-button" onclick="feed()">Feed</button>
         <button id="notificationsButton" onclick="handleNotificationsButtonClick()">Comment Notifications</button>
+        <button id="following-button" onclick="following()">Following Notifications</button>
     </header>
 
     <div id="likedPostsContainer">
@@ -130,6 +138,10 @@
 
         function feed(){
             window.location.href = '{% url "posts:Feed" %}'
+        }
+
+        function following(){
+            window.location.href = '{% url "Authmodules:following_notifs" %}'
         }
     </script>
 </body>

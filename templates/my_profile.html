@@ -377,8 +377,8 @@
             </div>
 
             <div class="profile-right">
-                <p><strong>Followers:</strong> {{ data.followers }}</p>
-                <p><strong>Following:</strong> {{ data.following }}</p>
+                <p><strong>Followers:</strong> <a href="{% url 'Authmodules:get_followers' %}">{{ data.followers }}</a></p>
+                <p><strong>Following:</strong> <a href="{% url 'Authmodules:get_following' %}">{{ data.following }}</a></p>
             </div>
         </div>
 

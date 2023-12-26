@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Replied Posts</title>
+    <title>Followers Notifications</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -63,7 +63,7 @@
             margin-right: 50px; /* Adjusted margin to provide space on the right */
         }
 
-        #follower-button,
+        #comment-button,
         #profile-button,
         #feed-button,
         #notificationsButton {
@@ -78,22 +78,21 @@
 </head>
 <body>
     <header>
-        <h1>Comment Notifications</h1>
+        <h1>Followers Notifications</h1>
         <div id="button-container">
             <button id="notificationsButton" onclick="handleNotificationsButtonClick()">Like Notifications</button>
             <button id="profile-button" onclick="profile()">Profile</button>
             <button id="feed-button" onclick="feed()">Feed</button>
-            <button id="follower-button" onclick="follower()">Follower</button>
+            <button id = "comment-button" onclick="comment()">Comment Notifications</button>
         </div>
     </header>
 
     <div id="repliedPostsContainer">
         {% for item in data %}
-            <div class="replied-item" onclick="handleClick('{{ item.replied_by }}', '{{ item.replied_on }}', '{{ item.replier_id }}', '{{ item.replied_at }}')">
+            <div class="replied-item">
                 <p>
-                    <span class="clickable" onclick="handleUserClick('{{ item.replier_id }}')">{{ item.replied_by }}</span>
-                    replied on
-                    <span class="clickable" onclick="handlePostClick('{{ item.replied_on }}')">post</span>
+                    <span class="clickable" onclick="handleUserClick('{{ item.follower_id }}')">{{ item.follower }}</span>
+                    followed you on {{item.followed_on}}</span>
                     at {{ item.replied_at }}
                 </p>
             </div>
@@ -104,15 +103,6 @@
         // JavaScript functions for handling clicks
         function handleUserClick(replierId) {
             window.location.href = '{% url "Authmodules:profiles" %}' + `?id=${replierId}`
-        }
-
-        function handlePostClick(repliedOn) {
-            window.location.href = '{% url "posts:post_detail" %}' + `?id=${repliedOn}` 
-        }
-
-        function handleClick(repliedBy, repliedOn, replierId, repliedAt) {
-            alert(repliedBy + ' replied on your post at ' + repliedOn + ' by ' + replierId + ' at ' + repliedAt);
-            // Add your custom logic here
         }
 
         function handleNotificationsButtonClick() {
@@ -127,8 +117,8 @@
             window.location.href = '{% url "posts:Feed" %}'
         }
 
-        function follower(){
-            window.location.href = '{% url "Authmodules:following_notifs" %}'
+        function comment(){
+            window.location.href = '{% url "posts:comments_notifs" %}'
         }
     </script>
 </body>

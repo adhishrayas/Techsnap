@@ -76,6 +76,7 @@
             border-radius: 4px;
         }
 
+        #profile-button,
         #remove-button,
         #liked-button,
         #disliked-button,
@@ -119,7 +120,13 @@
             position:absolute
         }
 
-        #remove-button,
+        #profile-button{
+            right:450px;
+            position:absolute
+        }
+
+        #profile-button:hover,
+        #remove-button:hover,
         #liked-button:hover,
         #disliked-button:hover,
         #seen-button:hover,
@@ -139,6 +146,7 @@
             <button id="seen-button" onclick="seen()">Seen</button>
             <button id="must-button" onclick="must()">Must</button>
             <button id="tracked-button" onclick="track()">Tracked</button>
+            <button id="profile-button" onclick="profile()">Profile</button>
         </div>
 </header>
 
@@ -183,6 +191,10 @@
 
     function track(){
         window.location.href = '{% url "movies:your_playlist" %}'+'?type=Tracking'
+    }
+
+    function profile(){
+        window.location.href = '{% url "Authmodules:profiles" %}'
     }
 </script>
 </body>

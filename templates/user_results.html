@@ -68,7 +68,7 @@
     <script>
 
         function seeUser(userID){
-            window.location.href = '{% url "Authmodules:profiles" %}' + `?id=&{userID}`
+            window.location.href = '{% url "Authmodules:profiles" %}' + `?id=${userID}`
         }
     </script>
 </body>

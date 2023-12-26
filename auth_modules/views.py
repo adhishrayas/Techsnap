@@ -165,7 +165,7 @@ class EditProfileView(GenericAPIView):
     def get_object(self):
         return self.request.user
 class search_users(APIView):
-
+    permission_classes = (IsAuthenticated,)
     def get(self,request,*args, **kwargs):
         if 'query' in request.GET:
             query = request.GET['query']
@@ -180,6 +180,45 @@ class search_users(APIView):
             return Response({"data":""})
 
     #return render(request, 'search_users.html', {'users': users})
+        
+class FollowingNotificationView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        user = self.request.user
+        followers = UserFollowing.objects.filter(following_user_id = user)
+        data = []
+        for f in followers:
+            obj = {}
+            obj['follower'] = f.user_id.username
+            obj['follower_id'] = f.user_id.id
+            obj['followed_on'] = f.created
+            data.append(obj)
+        
+        return render(request,'following_notifs.html',{"data":data})
+
+class GetFollowersView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,*args, **kwargs):
+        user = self.request.user
+        followers = UserFollowing.objects.filter(following_user_id = user)
+        data = []
+        for f in followers:
+            serializer = BasicProfileSerializer(f.user_id)
+            data.append(serializer.data)
+        return render(request,'user_results.html',{'data':data})
+    
+class GetFollowingView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,*args, **kwargs):
+        user = self.request.user
+        followers = UserFollowing.objects.filter(user_id = user)
+        data = []
+        for f in followers:
+            serializer = BasicProfileSerializer(f.following_user_id)
+            data.append(serializer.data)
+        return render(request,'user_results.html',{'data':data})
+    
 def settings_view(request):
     return render(request,'settings.html')
 
