@@ -15,13 +15,29 @@ class Movies(models.Model):
     rating = models.IntegerField(default = 0)
     rated_by = models.IntegerField(default = 0)
     content_id = models.IntegerField(default = 0)
-    content_type = models.CharField(max_length = 255,blank = True,null = True)
+    title = models.CharField(max_length = 255,default = '')
+    tagline = models.TextField(default = '')
+    release_date = models.CharField(max_length = 255,default = '')
+    runtime = models.CharField(max_length = 255,default = '')
+    overview = models.TextField(default = '')
+    budget = models.CharField(max_length = 255,default = '')
+    status = models.CharField(max_length = 255,default = '')
+    country = models.CharField(max_length = 255,default = '')
+    revenue = models.CharField(max_length = 255,default = '')
+    language = models.CharField(max_length = 255,default = '')
+    content_type = models.CharField(max_length = 255,default ='')
+    trailer_link = models.CharField(max_length = 255,default = '')
+    genre = models.TextField(default = '')
+    cast_and_crew = models.JSONField(null = True,blank = True)
+    production_companies = models.TextField(default = '')
     @property
     def total_rating(self):
         if self.rated_by == 0:
             return 0
         return self.rating/self.rated_by
-
+    
+    def __str__(self):
+        return str(self.content_id)
 
 class MoviesLikes(models.Model):
     id = models.UUIDField(
@@ -83,3 +99,13 @@ class Reaction(models.Model):
     reaction = models.IntegerField(default = 0)
     reacted_by = models.ForeignKey(CustomUser,on_delete = models.CASCADE)
     reacted_on = models.ForeignKey(Movies,on_delete = models.CASCADE)
+
+class TrackObject(models.Model):
+    id = models.UUIDField(
+        default = uuid.uuid4,
+        primary_key = True,
+        editable = False,
+    )
+    content_id = models.IntegerField(default = 0)
+    episode = models.IntegerField(default = 0)
+    owner = models.ForeignKey(CustomUser,on_delete = models.CASCADE)

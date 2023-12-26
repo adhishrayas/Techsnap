@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feed Page</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #141414;
+            color: #fff;
+        }
+
+        h1 {
+            color: #e50914;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        .logout-login-button {
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+            background-color: #e74c3c;
+        }
+
+        .logout-login-button:hover {
+            background-color: #c0392b;
+        }
+
+        .post-container {
+            margin-top: 70px; /* Adjusted margin to account for the fixed header */
+        }
+
+        .post {
+            border: 1px solid #333;
+            background-color: #282828;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .post-header {
+            padding: 12px;
+            background-color: #e50914;
+            color: #fff;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .post-content {
+            padding: 12px;
+            color: #fff;
+        }
+
+        .post-image {
+            max-width: 100%;
+            max-height: 200px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .post-footer {
+            padding: 12px;
+            background-color: #333;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .likes {
+            color: #e74c3c;
+        }
+
+        .timestamp {
+            color: #7f8c8d;
+        }
+
+        .searchuser-button,
+        .search-button,
+        .timeline-button,
+        .trending-button,
+        .create-button,
+        .profile-button,
+        .like-button,
+        .comment-button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .searchuser-button,
+        .search-button:hover,
+        .timeline-button:hover,
+        .trending-button:hover,
+        .create-button:hover,
+        .profile-button:hover,
+        .like-button:hover,
+        .comment-button:hover {
+            background-color: #e50914;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 10px 15px;
+            margin: 0 5px;
+            text-decoration: none;
+            color: #e50914;
+            background-color: #fff;
+            border: 1px solid #e50914;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .pagination a:hover {
+            background-color: #e50914;
+            color: #fff;
+        }
+
+        .pagination .current {
+            background-color: #e50914;
+            color: #fff;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".like-button").on("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var postId = $(this).data("post-id");
+                var likeUrl = "{% url 'posts:Like_Post' %}?id=" + postId;
+    
+                $.ajax({
+                    url: likeUrl,
+                    method: "GET",
+                    success: function (data) {
+                        if (data && data.Message === "Succesfull") {
+                            var likesElement = $("#likes-" + postId);
+                            $.get("{% url 'posts:Get_Likes' %}?id=" + postId, function (countData) {
+                                likesElement.text("Likes: " + countData.Likes);
+                            });
+                        } else {
+                            console.error("Invalid response format or likes not successful.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error occurred while processing the like.");
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>Techsnap</h1>
+        <div>
+            {% if user.is_authenticated %}
+                <a class="logout-login-button" href="{% url 'Authmodules:logout' %}">Logout</a>
+                <a class="profile-button" href="{% url 'Authmodules:profiles' %}">Profile</a>
+                <button id="create-button" onclick="create()">Create</button>
+                <a class="trending-button" href = "{% url "movies:Trending" %}">Trending</a>
+                <a class="trending-button" href = "{% url "movies:Upcoming" %}">Timeline</a>
+                <a class="search-button" href = "{% url "movies:search_movies"%}">Search Movies</a>
+                <a class="searchuser-button" href = "{% url "Authmodules:search" %}">Search User</a>
+            {% else %}
+                <a class="logout-login-button" href="{% url 'Authmodules:login' %}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="post-container">
+        <div id="app">
+            {% for post in results %}
+                <div class="post" onclick="postDetails('{{post.id}}')">
+                    <div class="post-header">
+                        <strong>Posted by:</strong> {{ post.user }}
+                    </div>
+                    <div class="post-content">{{ post.content }}</div>
+    
+                    {% if post.pic %}
+                        <img src="{{ post.pic }}" alt="Post Image">
+                    {% endif %}
+
+                    <div class="post-footer">
+                        <span id="likes-{{ post.id }}" class="likes"><strong>Likes:</strong> {{ post.like }}</span> | 
+                        <span id="comment-{{post.id}}" class="comments"><strong>Comments:</strong>{{ post.comments}}</span> |
+                        <span class="timestamp"><strong>Time:</strong> {{ post.timestamp }}</span>
+                        <a class="like-button" href="#" data-post-id="{{ post.id }}">Like</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            <span class="step-links">
+                {% if results.previous %}
+                    <a href="{{ results.previous }}">Previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ results.number }} of {{ results.num_pages }}.
+                </span>
+
+                {% if results.next %}
+                    <a href="{{ results.next }}">Next</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <script>
+
+        function postDetails(postID){
+            window.location.href = '{% url "posts:Get_Comments" %}' + `?id=${postID}`
+        }
+
+        function create(){
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('content_id');
+            const type = urlParams.get('content_type');
+            window.location.href = '{% url "posts:Post Create" %}' + `?content_id=${MovieId}` + `&content_type=${type}`;
+        }
+    </script>
+</body>
+</html>

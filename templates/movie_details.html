@@ -129,6 +129,18 @@
             background-color: #e50914;
         }
 
+        #feed-button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #feed-button:hover {
+            background-color: #e50914;
+        }
         #reaction-button {
             background-color: #3498db;
             color: #fff;
@@ -444,6 +456,7 @@
         <button id = "Must-button" onclick="addToMust()">Must Watch</button>
         <button id = "profile-button" onclick="profile()">Profile</button>
         <button id = "playlists-button" onclick="playlists()">Playlists</button>
+        <button id = "feed-button" onclick="feed()">Feed</button>
         {% if content_details.content_type == "tv" %}
             <button id = "Track-button" onclick="addToTrack()">Track</button>
         {% endif %}
@@ -705,12 +718,16 @@
             window.location.href = '{% url "movies:my_playlists" %}'
         }
 
-        function allPlaylist(){
+        function playlists(){
             window.location.href = '{% url "movies:my_playlists" %}'
         }
 
-        function playlists(){
-            window.location.href = '{% url "movies:my_playlists" %}'
+        function feed(){
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const type = urlParams.get('type');
+            window.location.href = '{% url "posts:movie_feed" %}' + `?content_id=${MovieId}` + `&content_type=${type}`;
         }
     </script>
 </body>

@@ -14,7 +14,8 @@ class Notification(models.Model):
     pic = models.ImageField(upload_to='posts/',null = True,blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     parent_post = models.ForeignKey('self',on_delete = models.CASCADE,blank = True,null = True,related_name = 'replies')
-
+    content_id = models.IntegerField(default = 0)
+    content_type = models.CharField(max_length = 255,blank = True,null = True)
     def __str__(self):
         return self.user.username
     

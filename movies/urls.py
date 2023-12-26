@@ -23,6 +23,7 @@ from .views import(
                    UpcomingReleaseView,
                    ReactMovieView,
                    RateMovieView,
+                   AddTrackObjectView
                    )
 
 
@@ -51,4 +52,5 @@ urlpatterns = [
     path('upcoming/',UpcomingReleaseView.as_view(),name = "Upcoming"),
     path('rate/',RateMovieView.as_view(),name = "rate"),
     path('react/',ReactMovieView.as_view(),name = "react"),
+    path('track/',AddTrackObjectView.as_view(),name = "track")
 ]

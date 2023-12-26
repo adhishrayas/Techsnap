@@ -172,6 +172,9 @@
                             {% if is_owner %}
                                 <button id="remove-playlist-button" onclick="removeMovie('{{ movie.id }}');event.stopPropagation()">Remove</button>
                             {% endif %}
+                            {% if data.title == "Tracking" %}
+                                <p><strong>Last Episode Seen:</strong>{{movie.episode_seen}}</p>
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}

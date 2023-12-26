@@ -173,6 +173,8 @@
             color: #e50914; /* Netflix red */
         }
 
+        .profile-button,
+        .playlists-button,
         .seen-button,
         .must-button,
         .track-button,
@@ -186,6 +188,8 @@
             cursor: pointer;
         }
 
+        .profile-button,
+        .playlists-button,
         .seen-button,
         .must-button,
         .track-button,
@@ -310,6 +314,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('rate-button').addEventListener('click', showRatingStars);
         });
+       
     </script>
 </head>
 <body>
@@ -327,6 +332,8 @@
         <button id = "seen-button" onclick="addToSeen()">Seen</button>
         <button id = "Must-button" onclick="addToMust()">Must Watch</button>
         <button id = "Track-button" onclick="addToTrack()">Track</button>
+        <button id = "profile-button" onclick="profile()">Profile</button>
+        <button id = "playlists-button" onclick="playlists()">Playlists</button>
     </header>
     <div id="detailsContainer">
 
@@ -366,29 +373,38 @@
             </ul>
         </section>
 
-        <section class="section" id="seasons">
-            <h2>Seasons</h2>
-            {% for season in content_details.seasons %}
-                <div class="season-item">
-                    <button class="season-button" onclick="toggleSeason('{{ season.name }}')">Season {{ season.season_number }}</button>
-                    <div class="season-content" id="season-{{ season.name }}">
-                        <ul class="episode-list">
-                            {% for episode in season.episodes %}
-                                <li class="episode-item">
-                                    <strong>{{ episode.name }}</strong>
-                                    <br>
-                                    {% if episode.videos.results %}
-                                        <iframe width="560" height="315" src="https://www.youtube.com/embed/{{ episode.videos.results.0.key }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                                    {% else %}
-                                        No video available
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            {% endfor %}
-        </section>
+        <!-- ... (previous HTML code) ... -->
+
+       <section class="section" id="seasons">
+        <h2>Seasons</h2>
+     {% for season in content_details.seasons %}
+        <div class="season-item">
+            <button class="season-button" onclick="toggleSeason('{{ season.name }}')">Season {{ season.season_number }}</button>
+            <div class="season-content" id="season-{{ season.name }}">
+                <ul class="episode-list">
+                    {% for episode in season.episodes %}
+                        <li class="episode-item" onclick="playEpisode('{{ episode.name }}', '{{ episode.synopsis }}', '{{ episode.running_time }}', {{ episode.episode_number }})">
+                            <div class="episode-card">
+                                <strong>{{ episode.name }}</strong>
+                                <p>Synopsis: {{ episode.synopsis }}</p>
+                                <p>Running Time: {{ episode.running_time }}</p>
+                                <p>Episode Number: {{ episode.episode_number }}</p>
+                                {% if episode.videos.results %}
+                                    <iframe width="560" height="315" src="https://www.youtube.com/embed/{{ episode.videos.results.0.key }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                {% else %}
+                                    No video available
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endfor %}
+</section>
+
+<!-- ... (remaining HTML code) ... -->
+
 
         <section class="section">
             <h2>Credits</h2>
@@ -533,6 +549,22 @@
 
             popup.style.display = 'block';
         }
+        function playEpisode(name, synopsis, runningTime, episodeNumber) {
+            // You can use the parameters (name, synopsis, runningTime, episodeNumber) to send data to your API endpoint
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const type = urlParams.get('type');
+    
+            const url = `{% url 'movies:track' %}?id=${MovieId}&ep=${episodeNumber}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Response:', data);
+                    // Add additional logic if needed
+                })
+                .catch(error => console.error('Error sending GET request:', error));
+        }
 
         function addMovie(playlistID, addButton) {
             const queryString = window.location.search;
@@ -629,6 +661,13 @@
                     console.log(data.message);
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
+        }
+        function profile(){
+            window.location.href = '{% url "Authmodules:profiles" %}'
+        }
+
+        function allPlaylist(){
+            window.location.href = '{% url "movies:my_playlists" %}'
         }
     </script>
 </body>

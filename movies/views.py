@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db import transaction
-from .models import MoviesLikes,Movies,Playlists,MoviesDisLikes,Ratings,Reaction
+from .models import MoviesLikes,Movies,Playlists,MoviesDisLikes,Ratings,Reaction,TrackObject
 from .serializers import PlayListSerializer,PlaylistMiniSerializer
 from auth_modules.models import UserFollowing
 from rest_framework import status
@@ -128,6 +128,40 @@ class movie_details(APIView):
         response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
         content_details = response.json()
         movie,created = Movies.objects.get_or_create(content_id = content_id,content_type = content_type)
+        if "budget" in content_details:
+            movie.budget = content_details["budget"]
+        if "genres" in content_details:
+            for g in content_details["genres"]:
+              if "name" in g:
+                movie.genre += g["name"] + ","
+        if "original_language" in content_details:
+            movie.language = content_details["original_language"]
+        if "title" in content_details:
+            movie.title = content_details["title"]
+        if "overview" in content_details:
+            movie.overview = content_details["overview"]
+        if "release_date" in content_details:
+            movie.release_date = content_details["release_date"]
+        if "production_companies" in content_details:
+            for p in content_details["production_companies"]:
+              if "name" in p:
+                movie.production_companies += p["name"] + ","
+        if "revenue" in content_details:
+            movie.revenue = content_details["revenue"]
+        if "runtime" in content_details:
+            movie.runtime = content_details["runtime"]
+        if "status" in content_details:
+            movie.status = content_details["status"]
+        if "tagline" in content_details:
+            movie.tagline = content_details["tagline"]
+        if "videos" in content_details:
+           if "results" in content_details["videos"]:
+              results = content_details["videos"]["results"]
+              if results:
+                 movie.trailer_link = results[0]["key"]
+        if "credits" in content_details:
+            movie.cast_and_crew = content_details["credits"]
+        movie.save()
         count = MoviesLikes.objects.filter(liked_on = movie).count()
         dis_like_count = MoviesDisLikes.objects.filter(liked_on = movie).count()
         rating,created = Ratings.objects.get_or_create(rated_by = self.request.user,rated_on = movie)
@@ -156,8 +190,10 @@ class movie_details(APIView):
                             episode_response.raise_for_status()
                             episode_data = episode_response.json()
                             episode['videos'] = episode_data.get('videos', {})
+                            episode['synopsis'] = episode_data.get('overview', '')  # Add episode synopsis
+                            episode['episode_number'] = episode_number  # Add episode number
             
-            #return Response({"data":content_details})
+           # return Response({"data":content_details})
             return render(request, 'series.html', {'content_details': content_details})
                     
     except requests.exceptions.RequestException as e:
@@ -382,10 +418,21 @@ class GetYourPlayList(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self,request,*args, **kwargs):
-        type = self.request.query_params.get('type')
+      type = self.request.query_params.get('type')
+      if type == "Tracking":
         user = self.request.user
         playlist = Playlists.objects.get(owner = user,title = type)
         serializer =PlayListSerializer(playlist)
+        for movie in serializer.data['movies']:
+                tracker = TrackObject.objects.get(content_id = movie['content_id'],owner = self.request.user)
+                movie['episode_seen'] = tracker.episode
+        #return Response({"data":serializer.data})
+        return render(request,'playlist.html',{"data":serializer.data})
+      else:
+        user = self.request.user
+        playlist = Playlists.objects.get(owner = user,title = type)
+        serializer =PlayListSerializer(playlist)
+        #return Response({"data":serializer.data})
         return render(request,'playlist.html',{"data":serializer.data})
 
 class AddtoSeenPlaylistView(APIView):
@@ -550,3 +597,15 @@ class ReactMovieView(APIView):
         reaction.reaction = reacted
         reaction.save()
         return Response({"message":"success"})
+
+class AddTrackObjectView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self,request,*args, **kwargs):
+        content_id = self.request.query_params.get('id')
+        episode = self.request.query_params.get('ep')
+        user = self.request.user
+        track,created = TrackObject.objects.get_or_create(content_id = content_id,owner = user)
+        track.episode = episode
+        track.save()
+        return Response({"message":"Success"})

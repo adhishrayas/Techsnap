@@ -25,6 +25,20 @@ class FeedView(ListAPIView):
         response = super().list(request, *args, **kwargs)
         return render(request, 'feed.html', {'results': response.data})
     
+class MovieFeedView(APIView):
+    permission_classes = (AllowAny,)
+    pagination_class = PostPagination
+    def get(self,request,*args, **kwargs):
+        content_id = self.request.query_params.get('content_id')
+        content_type = self.request.query_params.get('content_type')
+        query = Notification.objects.filter(content_id = content_id,content_type = content_type)
+        data = []
+        for q in query:
+            serializer = PostSerializer(q)
+            data.append(serializer.data)
+        
+        #return Response({"data":data})
+        return render(request,'post_feed.html',{'results':data})
 
 class PostCreateView(CreateAPIView):
     serializer_class = PostSerializer
@@ -38,8 +52,18 @@ class PostCreateView(CreateAPIView):
            serializer = self.get_serializer(data=request.data)
            serializer.is_valid(raise_exception=True)
            self.perform_create(serializer)
-           post_data = PostSerializer(serializer.instance).data
-           return render(request, 'post_created.html', {'post': post_data})
+           post = serializer.instance
+           if self.request.query_params.get('content_id') is None:
+              post_data = PostSerializer(post).data
+              return render(request, 'post_created.html', {'post': post_data})
+           else:
+               content_id = self.request.query_params.get('content_id')
+               content_type = self.request.query_params.get('content_type')
+               post.content_id = content_id
+               post.content_type = content_type
+               post.save()
+               post_data = PostSerializer(post).data
+               return render(request,'post_created.html',{'post':post_data})
         else:
             parent_id = self.request.query_params.get('id')
             parent = Notification.objects.get(id = parent_id)
@@ -48,9 +72,17 @@ class PostCreateView(CreateAPIView):
             self.perform_create(serializer)
             comment = serializer.instance
             comment.parent_post = parent
-            comment.save()
-            comment_data = PostSerializer(comment)
-            return render(request,'post_created.html',{'post':comment_data.data})
+            if parent.content_id == 0:
+                comment.save()
+                comment_data = PostSerializer(comment)
+                return render(request,'post_created.html',{'post':comment_data.data})
+            else:
+                comment.content_id = parent.content_id
+                comment.content_type = parent.content_type
+                comment.save()
+                comment_data = PostSerializer(comment)
+                return render(request,'post_created.html',{'post':comment_data.data})
+
          
     def perform_create(self,serializer):
         serializer.save(user = self.request.user)
