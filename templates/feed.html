@@ -96,6 +96,7 @@
             color: #7f8c8d;
         }
 
+        .timeline-button,
         .trending-button,
         .create-button,
         .profile-button,
@@ -109,6 +110,7 @@
             cursor: pointer;
         }
         
+        .timeline-button:hover,
         .trending-button:hover,
         .create-button:hover,
         .profile-button:hover,
@@ -185,6 +187,7 @@
                 <a class="profile-button" href="{% url 'Authmodules:profiles' %}">Profile</a>
                 <a class="create-button" href = "{% url "posts:Post Create" %}">Create</a>
                 <a class="trending-button" href = "{% url "movies:Trending" %}">Trending</a>
+                <a class="trending-button" href = "{% url "movies:Upcoming" %}">Timeline</a>
             {% else %}
                 <a class="logout-login-button" href="{% url 'Authmodules:login' %}">Login</a>
             {% endif %}

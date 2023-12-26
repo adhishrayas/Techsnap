@@ -19,7 +19,8 @@ from .views import(
                    AddtoSeenPlaylistView,
                    AddtoMustWatchPlaylistView,
                    AddtoTrackingPlaylistView,
-                   TrendingMediaView
+                   TrendingMediaView,
+                   UpcomingReleaseView
                    )
 
 
@@ -44,5 +45,6 @@ urlpatterns = [
     path('add_to_scene/',AddtoSeenPlaylistView.as_view(),name = "Add_scene"),
     path('add_to_must/',AddtoMustWatchPlaylistView.as_view(),name = "Add_must"),
     path('add_to_track/',AddtoTrackingPlaylistView.as_view(),name = "Add_tracking"),
-    path('trending/',TrendingMediaView.as_view(),name = "Trending")
+    path('trending/',TrendingMediaView.as_view(),name = "Trending"),
+    path('upcoming/',UpcomingReleaseView.as_view(),name = "Upcoming")
 ]

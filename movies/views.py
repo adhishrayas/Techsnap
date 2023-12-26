@@ -473,3 +473,48 @@ class TrendingMediaView(APIView):
         except Exception as e:
             return Response({'error': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class UpcomingReleaseView(APIView):
+    def get(self, request, format=None):
+        api_key = settings.API_KEY_TMDB  # Use settings module to access API key
+        movie_url = f'https://api.themoviedb.org/3/movie/upcoming?api_key={api_key}&language=en-US&page=1'
+        tv_url = f'https://api.themoviedb.org/3/tv/on_the_air?api_key={api_key}&language=en-US&page=1'
+
+        try:
+            movie_response = requests.get(movie_url)
+            tv_response = requests.get(tv_url)
+
+            movie_response.raise_for_status()
+            tv_response.raise_for_status()
+
+            movie_data = movie_response.json()
+            tv_data = tv_response.json()
+
+            movies = [
+                {
+                    'id': movie['id'],
+                    'title': movie['title'],
+                    'overview': movie['overview'],
+                    'release_date': movie['release_date'],
+                    'image_url': f"https://image.tmdb.org/t/p/w500/{movie['poster_path']}",
+                    'content_type': 'movie',
+                }
+                for movie in movie_data.get('results', [])
+            ]
+
+            tv_shows = [
+                {
+                    'id': series['id'],
+                    'name': series['name'],
+                    'overview': series['overview'],
+                    'first_air_date': series['first_air_date'],
+                    'image_url': f"https://image.tmdb.org/t/p/w500/{series['poster_path']}",
+                    'content_type': 'tv'
+                }
+                for series in tv_data.get('results', [])
+            ]
+
+            # Combine movie and TV show data
+            results = {'movies': movies, 'tv_shows': tv_shows}
+            return render(request,'upcoming.html',results)
+        except requests.exceptions.RequestException as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

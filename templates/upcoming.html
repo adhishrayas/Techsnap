@@ -1,0 +1,90 @@
+<!-- templates/trending_media.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trending Media</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #141414;
+            color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e50914;
+        }
+
+        .media-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .media-card {
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px;
+            max-width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            background-color: #333;
+            cursor: pointer;
+        }
+
+        .media-card:hover {
+            transform: scale(1.05);
+        }
+
+        .media-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Trending Media</h1>
+
+    <div class="media-container">
+        <!-- Trending Movies -->
+        {% if movies %}
+            <h2>Trending Movies</h2>
+            {% for movie in movies %}
+                <div class="media-card" onclick="handleMediaClick('{{ movie.id }}', '{{ movie.content_type }}')" data-id="{{ movie.id }}">
+                    <p><strong>{{ movie.title }}</strong></p>
+                    <p>Release Date: {{ movie.release_date }}</p>
+                    <p>{{ movie.overview }}</p>
+                    <img class="media-image" src="{{ movie.image_url }}" alt="{{ movie.title }}">
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Trending Series -->
+        {% if tv_shows %}
+            <h2>Trending Series</h2>
+            {% for series in tv_shows %}
+                <div class="media-card" onclick="handleMediaClick('{{ series.id }}', '{{ series.content_type }}')" data-id="{{ series.id }}">
+                    <p><strong>{{ series.name }}</strong></p>
+                    <p>First Air Date: {{ series.first_air_date }}</p>
+                    <p>{{ series.overview }}</p>
+                    <img class="media-image" src="{{ series.image_url }}" alt="{{ series.name }}">
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <script>
+        // Additional JavaScript for interactivity
+        function handleMediaClick(mediaID, mediaType) {
+            // Customize this function based on your needs
+            // Example: Redirect to a media details page
+            window.location.href = '{% url "movies:movie_details" %}' + `?id=${mediaID}` + `&type=${mediaType}`;
+        }
+    </script>
+</body>
+</html>
