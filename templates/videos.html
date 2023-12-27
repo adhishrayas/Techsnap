@@ -57,6 +57,19 @@
             background-color: #333;
             padding: 10px;
             border-radius: 8px;
+            position: relative; /* Position relative for absolute positioning of the button */
+        }
+
+        .tick-mark-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #e50914;
+            color: #fff;
+            padding: 5px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
         }
 
         iframe {
@@ -88,6 +101,7 @@
                         {% for episode in season.episodes %}
                             <li class="episode-item">
                                 <div class="episode-card">
+                                    <button class="tick-mark-button" onclick="addToTrack('{{episode.episode_number}}','{{season.season_number}}','{{episode.name}}','{{episode.synopsis}}','{{content_details.title}}')">&#10003;</button>
                                     <strong>{{ episode.name }}</strong>
                                     <p>Synopsis: {{ episode.synopsis }}</p>
                                     <p>Running Time: {{ episode.runtime }}</p>
@@ -105,5 +119,19 @@
             </div>
         {% endfor %}
     </section>
+    <script>
+    function addToTrack(ep,season,title,synopsis,Title){
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const MovieId = urlParams.get('id');
+        const url = '{% url "movies:track" %}' + `?id=${MovieId}&ep=${ep}&season=${season}&title=${title}&synopsis=${synopsis}&show=${Title}` 
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.message);
+            })
+            .catch(error => console.error('Error adding to playlist:', error));
+    }
+    </script>
 </body>
 </html>

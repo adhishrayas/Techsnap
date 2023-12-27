@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer,ReadOnlyField,SerializerMethodField
-from .models import Movies,Playlists
+from .models import Movies,Playlists,TrackObject
 import requests
 from django.conf import settings
 
@@ -74,3 +74,9 @@ class PlaylistMiniSerializer(ModelSerializer):
                 return f'https://image.tmdb.org/t/p/w500{poster_path}'
         else:
             return None
+
+class TrackerSerializer(ModelSerializer):
+    
+    class Meta:
+        model = TrackObject
+        fields = "__all__"

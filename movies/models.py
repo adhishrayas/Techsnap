@@ -109,3 +109,7 @@ class TrackObject(models.Model):
     content_id = models.IntegerField(default = 0)
     episode = models.IntegerField(default = 0)
     owner = models.ForeignKey(CustomUser,on_delete = models.CASCADE)
+    season = models.IntegerField(default = 0)
+    title = models.CharField(max_length = 255,blank = True,null = True)
+    synopsis = models.TextField(blank = True,null =True)
+    show = models.CharField(max_length = 255,blank = True,null = True)

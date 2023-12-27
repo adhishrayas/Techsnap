@@ -152,12 +152,14 @@
 
 <div class="profile">
     {% for item in data %}
+      <div>
+        <button class="remove-button" onclick="removePlaylist('{{item.id}}')">Remove</button>
         <div class="playlist" onclick="viewPlaylist('{{item.id}}')">
-            <button class="remove-button" onclick="removePlaylist('{{item.id}}')">Remove</button>
             <h2>{{ item.title }}</h2>
             <p>Movie Count: {{ item.movie_count }}</p>
             <img src="{{ item.playlist_cover }}" alt="Playlist Cover">
         </div>
+      </div>
     {% endfor %}
 </div>
 
@@ -167,7 +169,13 @@
 <script>
 
     function removePlaylist(ID){
-        const url = '{% url "movies:delete_playlist" %}'+`?id=${ID}`
+        const url = '{% url "movies:delete_playlist" %}'+`?id=${ID}`;
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            console.log(data.message);
+          })
+        .catch(error => console.error('Error adding to playlist:', error));
     }
     function viewPlaylist(playlistID){
         window.location.href = '{% url "movies:view_playlist" %}' + `?id=${playlistID}`
@@ -190,7 +198,7 @@
     }
 
     function track(){
-        window.location.href = '{% url "movies:your_playlist" %}'+'?type=Tracking'
+        window.location.href = '{% url "movies:tracked" %}'
     }
 
     function profile(){

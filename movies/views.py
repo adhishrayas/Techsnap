@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db import transaction
 from .models import MoviesLikes,Movies,Playlists,MoviesDisLikes,Ratings,Reaction,TrackObject
-from .serializers import PlayListSerializer,PlaylistMiniSerializer
+from .serializers import PlayListSerializer,PlaylistMiniSerializer,TrackerSerializer
 from auth_modules.models import UserFollowing
 from rest_framework import status
 from rest_framework.response import Response
@@ -23,21 +23,14 @@ def search_results(request):
     base_url_movies = 'https://api.themoviedb.org/3/search/movie'
     base_url_tv_shows = 'https://api.themoviedb.org/3/search/tv'
     params = {'api_key': api_key, 'query': query}
-    
-    # Fetch movie results
     response_movies = requests.get(base_url_movies, params=params)
     data_movies = response_movies.json()
-    
-    # Fetch TV show results
     response_tv_shows = requests.get(base_url_tv_shows, params=params)
     data_tv_shows = response_tv_shows.json()
-
     if response_movies.status_code == 200 and response_tv_shows.status_code == 200:
         results_movies = data_movies.get('results', [])
         results_tv_shows = data_tv_shows.get('results', [])
         results_with_images = []
-
-        # Add content type to movie results
         for result in results_movies:
             poster_path = result.get('poster_path')
             if poster_path:
@@ -46,8 +39,6 @@ def search_results(request):
                 result['poster_url'] = None
             result['content_type'] = 'movie'
             results_with_images.append(result)
-
-        # Add content type to TV show results
         for result in results_tv_shows:
             poster_path = result.get('poster_path')
             if poster_path:
@@ -55,9 +46,8 @@ def search_results(request):
             else:
                result['poster_url'] = None
             result['content_type'] = 'tv'
-            result['title'] = result.get('name', '')  # Use 'name' instead of 'title' for TV shows
+            result['title'] = result.get('name', '') 
             results_with_images.append(result)
-
         return JsonResponse({'results': results_with_images})
     else:
         return JsonResponse({'error': 'Failed to fetch data'})
@@ -68,21 +58,14 @@ def search_return(request):
     base_url_movies = 'https://api.themoviedb.org/3/search/movie'
     base_url_tv_shows = 'https://api.themoviedb.org/3/search/tv'
     params = {'api_key': api_key, 'query': query}
-    
-    # Fetch movie results
     response_movies = requests.get(base_url_movies, params=params)
     data_movies = response_movies.json()
-    
-    # Fetch TV show results
     response_tv_shows = requests.get(base_url_tv_shows, params=params)
     data_tv_shows = response_tv_shows.json()
-
     if response_movies.status_code == 200 and response_tv_shows.status_code == 200:
         results_movies = data_movies.get('results', [])
         results_tv_shows = data_tv_shows.get('results', [])
         results_with_images = []
-
-        # Add content type to movie results
         for result in results_movies:
             poster_path = result.get('poster_path')
             if poster_path:
@@ -91,8 +74,6 @@ def search_return(request):
                 result['poster_url'] = None
             result['content_type'] = 'movie'
             results_with_images.append(result)
-
-        # Add content type to TV show results
         for result in results_tv_shows:
             poster_path = result.get('poster_path')
             if poster_path:
@@ -100,9 +81,8 @@ def search_return(request):
             else:
                result['poster_url'] = None
             result['content_type'] = 'tv'
-            result['title'] = result.get('name', '')  # Use 'name' instead of 'title' for TV shows
+            result['title'] = result.get('name', '') 
             results_with_images.append(result)
-
         context = {'api_response': {'results': results_with_images}}
         return render(request, 'see_more.html', context)
     else:
@@ -125,7 +105,7 @@ class movie_details(APIView):
     
     try:
         response = requests.get(tmdb_url)
-        response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
+        response.raise_for_status() 
         content_details = response.json()
         movie,created = Movies.objects.get_or_create(content_id = content_id,content_type = content_type)
         if "budget" in content_details:
@@ -386,6 +366,7 @@ class RemoveFromPlaylistView(APIView):
         except Playlists.DoesNotExist:
             return Response({"message": "Playlist not found"}, status=400)
 
+
 class GetYourPlayList(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -397,7 +378,6 @@ class GetYourPlayList(APIView):
         serializer =PlayListSerializer(playlist)
         for movie in serializer.data['movies']:
                 tracker = TrackObject.objects.get(content_id = movie['content_id'],owner = self.request.user)
-                movie['episode_seen'] = tracker.episode
         #return Response({"data":serializer.data})
         return render(request,'playlist.html',{"data":serializer.data})
       else:
@@ -406,6 +386,7 @@ class GetYourPlayList(APIView):
         serializer =PlayListSerializer(playlist)
         #return Response({"data":serializer.data})
         return render(request,'playlist.html',{"data":serializer.data})
+
 
 class AddtoSeenPlaylistView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -423,6 +404,7 @@ class AddtoSeenPlaylistView(APIView):
         except Playlists.DoesNotExist:
             return Response({"message": "Playlist not found"}, status=400)
 
+
 class AddtoMustWatchPlaylistView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request, *args, **kwargs):
@@ -439,27 +421,11 @@ class AddtoMustWatchPlaylistView(APIView):
         except Playlists.DoesNotExist:
             return Response({"message": "Playlist not found"}, status=400)
 
-class AddtoTrackingPlaylistView(APIView):
-    permission_classes = (IsAuthenticated,)
-    def get(self, request, *args, **kwargs):
-        movie_id = self.request.query_params.get('movie_id')
-        try:
-            movie = Movies.objects.get(content_id=movie_id,content_type = "tv")
-            playlist = Playlists.objects.get(title = "Tracking",owner = self.request.user)
-            playlist.movies.add(movie)
-            playlist.save()
-            return Response({"message": "Added to playlist"})
-        except Movies.DoesNotExist:
-            return Response({"message": "Movie not found"}, status=400)
-        except Playlists.DoesNotExist:
-            return Response({"message": "Playlist not found"}, status=400)
-
 class TrendingMediaView(APIView):
     def get(self, request, *args, **kwargs):
         api_key = settings.API_KEY_TMDB
         trending_movies_url = f'https://api.themoviedb.org/3/trending/movie/week?api_key={api_key}'
         trending_series_url = f'https://api.themoviedb.org/3/trending/tv/week?api_key={api_key}'
-
         try:
             trending_movies_response = requests.get(trending_movies_url)
             trending_series_response = requests.get(trending_series_url)
@@ -477,7 +443,6 @@ class TrendingMediaView(APIView):
                     }
                     for movie in trending_movies_data['results']
                 ]
-
                 trending_series = [
                     {
                         'id': series['id'],
@@ -494,26 +459,22 @@ class TrendingMediaView(APIView):
                 return Response(trending_media)
             else:
                 return Response({'error': 'Failed to fetch trending media'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
         except Exception as e:
             return Response({'error': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class UpcomingReleaseView(APIView):
     def get(self, request, format=None):
-        api_key = settings.API_KEY_TMDB  # Use settings module to access API key
+        api_key = settings.API_KEY_TMDB 
         movie_url = f'https://api.themoviedb.org/3/movie/upcoming?api_key={api_key}&language=en-US&page=1'
         tv_url = f'https://api.themoviedb.org/3/tv/on_the_air?api_key={api_key}&language=en-US&page=1'
-
         try:
             movie_response = requests.get(movie_url)
             tv_response = requests.get(tv_url)
-
             movie_response.raise_for_status()
             tv_response.raise_for_status()
-
             movie_data = movie_response.json()
             tv_data = tv_response.json()
-
             movies = [
                 {
                     'id': movie['id'],
@@ -525,7 +486,6 @@ class UpcomingReleaseView(APIView):
                 }
                 for movie in movie_data.get('results', [])
             ]
-
             tv_shows = [
                 {
                     'id': series['id'],
@@ -537,12 +497,11 @@ class UpcomingReleaseView(APIView):
                 }
                 for series in tv_data.get('results', [])
             ]
-
-            # Combine movie and TV show data
             results = {'movies': movies, 'tv_shows': tv_shows}
             return render(request,'upcoming.html',results)
         except requests.exceptions.RequestException as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class RateMovieView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -576,11 +535,17 @@ class AddTrackObjectView(APIView):
     def get(self,request,*args, **kwargs):
         content_id = self.request.query_params.get('id')
         episode = self.request.query_params.get('ep')
+        season = self.request.query_params.get('season')
+        title = self.request.query_params.get('title')
+        synopsis = self.request.query_params.get('synopsis')
+        Show = self.request.query_params.get('Title')
         user = self.request.user
-        track,created = TrackObject.objects.get_or_create(content_id = content_id,owner = user)
-        track.episode = episode
-        track.save()
-        return Response({"message":"Success"})
+        try:
+            track = TrackObject.objects.get(content_id = content_id,owner = user,episode = episode,season = season,title = title,synopsis = synopsis,show = Show)
+            return Response({"message":"Success"})
+        except:
+            track = TrackObject.objects.create(content_id = content_id,owner = user, season = season,episode = episode,title = title,synopsis = synopsis,show = Show)
+            return Response({"message":"Success"})
 
 class GetVideosView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -589,7 +554,7 @@ class GetVideosView(APIView):
         content_id = self.request.query_params.get('id')
         tmdb_url = f'https://api.themoviedb.org/3/tv/{content_id}?api_key={api_key}&append_to_response=videos,credits'
         response = requests.get(tmdb_url)
-        response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
+        response.raise_for_status()  
         content_details = response.json()
         for season in content_details.get('seasons', []):
                 season_number = season.get('season_number')
@@ -599,8 +564,6 @@ class GetVideosView(APIView):
                     season_response.raise_for_status()
                     season_data = season_response.json()
                     season['episodes'] = season_data.get('episodes', [])
-
-                     # Add videos for each episode
                     for episode in season['episodes']:
                         episode_number = episode.get('episode_number')
                         if episode_number is not None:
@@ -609,8 +572,16 @@ class GetVideosView(APIView):
                             episode_response.raise_for_status()
                             episode_data = episode_response.json()
                             episode['videos'] = episode_data.get('videos', {})
-                            episode['synopsis'] = episode_data.get('overview', '')  # Add episode synopsis
-                            episode['episode_number'] = episode_number  # Add episode number
+                            episode['synopsis'] = episode_data.get('overview', '') 
+                            episode['episode_number'] = episode_number 
         return render(request,'videos.html',{"content_details":content_details})
             
-        
+class GetTrackedObjectsView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,*args, **kwargs):
+        tracking_objects = TrackObject.objects.filter(owner = self.request.user)
+        data = []
+        for t in tracking_objects:
+            serializer = TrackerSerializer(t)
+            data.append(serializer.data)
+        return render(request,'tracker.html',{"data":data})

@@ -23,138 +23,115 @@
             width: 100%;
             z-index: 1000; /* Ensure the header appears above other elements */
         }
+    .action-button,
+    .like-button,
+    .profile-button,
+    .playlists-button,
+    .dislike-button,
+    .Track-button,
+    .Must-button,
+    .seen-button,
+    .playlist-button,
+    #rate-button,
+    #feed-button,
+    #reaction-button {
+        background-color: #e50914; /* Red color */
+        color: #fff; /* White text color */
+        padding: 8px 12px;
+        text-decoration: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .action-button:hover,
+    .like-button:hover,
+    .profile-button:hover,
+    .playlists-button:hover,
+    .dislike-button:hover,
+    .Track-button:hover,
+    .Must-button:hover,
+    .seen-button:hover,
+    .playlist-button:hover,
+    #rate-button:hover,
+    #feed-button:hover,
+    #reaction-button:hover {
+        background-color: #e50914; /* Darker red on hover */
+    }
+    .create-playlist-button {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 50%;
+        background-color: #e50914; /* Red color */
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 0;
+        cursor: pointer;
+        z-index: 1001; /* Ensure the button appears above other elements */
+    }
+    
+    .hidden {
+        display: none;
+    }
+    
+    .video-dropdown {
+        position: relative;
+    }
 
-        .action-button {
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-            color: #fff;
-            margin-right: 10px;
-            transition: background-color 0.3s ease;
-        }
+    .video-dropdown-content {
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        padding: 10px;
+    }
 
-        .like-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    .video-dropdown-content div {
+        margin-bottom: 10px;
+    }
 
-        .like-button:hover {
-            background-color: #e50914;
-        }
+    .video-dropdown-content div iframe {
+        width: 300px;
+        height: 200px;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-        .profile-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    .video-dropdown-content div p {
+        text-align: center;
+        max-width: 150px;
+    }
 
-        .profile-button:hover {
-            background-color: #e50914;
-        }
-
-        .playlists-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .playlists-button:hover {
-            background-color: #e50914;
-        }
-
-        .dislike-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .dislike-button:hover {
-            background-color: #e50914;
-        }
-
-        .Track-button,
-        .Must-button,
-        .seen-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .Must-button,
-        .Track-button,
-        .seen-button:hover {
-            background-color: #e50914;
-        }
-
-        .playlist-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .playlist-button:hover {
-            background-color: #e50914;
-        }
-
-        #rate-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #rate-button:hover {
-            background-color: #e50914;
-        }
-
-        #feed-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #feed-button:hover {
-            background-color: #e50914;
-        }
-        #reaction-button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #reaction-button:hover {
-            background-color: #e50914;
-        }
-
-        h1,
+    .playlist-list-item.selected {
+        background-color: #e50914; /* Change the color to your desired highlight color */
+        color: #fff; /* Change the text color to contrast with the background */
+    }
+    h1,
+    h2,
+    h3 {
+        color: #e50914; /* Netflix red for headings */
+        text-align: center;
+    }
+    
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    
+    li {
+        margin-bottom: 10px;
+    }
+    
+    p {
+        margin-bottom: 15px;
+    }
+    h1,
         h2,
         h3 {
             color: #e50914; /* Netflix red for headings */
@@ -238,8 +215,13 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            max-height: 70vh;
+            min-width: 300px;
+            max-height: 80vh; /* Adjust the max-height value as needed */
             overflow-y: auto; /* Add a scrollbar if content exceeds max-height */
+            min-height: 150px; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .playlist-list {
@@ -307,70 +289,27 @@
         .emoji:hover {
             color: #e50914; /* Netflix red */
         }
-
-        .create-playlist-button {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 50%;
-            background-color: #3498db; /* Adjust the color as needed */
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 0;
-            cursor: pointer;
-            z-index: 1001; /* Ensure the button appears above other elements */
+        #seen-button.clicked,
+        #Must-button.clicked {
+           background-color: #4CAF50; /* Green color */
         }
 
-        
-        .hidden {
-            display: none;
+        #seen-button.clicked:hover,
+        #Must-button.clicked:hover {
+            background-color: #45a049; /* Darker green on hover */
         }
-
-        .dropdown-button {
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: #3498db;
-            color: #fff;
-            transition: background-color 0.3s ease;
-        }
-
-        .dropdown-button:hover {
-            background-color: #e50914;
-        }
-
-        .video-dropdown {
-            position: relative;
-        }
-
-        .video-dropdown-content {
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            padding: 10px;
-        }
-
-        .video-dropdown-content div {
-            margin-bottom: 10px;
-        }
-
-        .video-dropdown-content div iframe {
-            width: 300px;
-            height: 200px;
-            border: none;
+        .movie-poster {
+            max-width: 100%;
+            height: auto;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            /* Add any additional styles for the poster image */
         }
-
-        .video-dropdown-content div p {
-            text-align: center;
-            max-width: 150px;
+        
+        .movie-background {
+            display: none; /* Hide the background image when the poster is visible */
+            max-width: 100%;
+            height: auto;
+            /* Add any additional styles for the background image */
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -499,8 +438,8 @@
 <body>
     <header>
         <h1>{{ content_details.title }} Details</h1>
-        <button id="playlist-button" onclick="showPlaylists()">Add To Playlist</button>
-        <a class="like-button" href="#" data-post-id="{{ content_details.id }}">Like</a>
+        <button class = "action-button" id="playlist-button" onclick="showPlaylists()">Add To Playlist</button>
+        <a class="action-button" href="#" data-post-id="{{ content_details.id }}">Like</a>
         <span id="likes-{{ content_details.id }}" class="likes"><strong>Likes:</strong> {{ content_details.likes }}</span> |
         <button id="rate-button" onclick="showRatingStars()">Rate</button>
         <span id="rating-{{ content_details.id }}" class="rating"><strong>Rating:</strong> {{ content_details.rated}}</span> | 
@@ -509,14 +448,11 @@
         <span id="reacted-emoji" class="emoji" data-emoji-value="{{ content_details.reacted }}" onclick="showReactionPopup()"></span> |
         <a class="dislike-button" href="#" data-post-id="{{ content_details.id }}">DisLike</a>
         <span id="dislikes-{{ content_details.id }}" class="dislikes"><strong>DisLikes:</strong> {{ content_details.dislikes }}</span> |
-        <button id = "seen-button" onclick="addToSeen()">Seen</button>
-        <button id = "Must-button" onclick="addToMust()">Must Watch</button>
-        <button id = "profile-button" onclick="profile()">Profile</button>
-        <button id = "playlists-button" onclick="playlists()">Playlists</button>
-        <button id = "feed-button" onclick="feed()">Feed</button>
-        {% if content_details.content_type == "tv" %}
-            <button id = "Track-button" onclick="addToTrack()">Track</button>
-        {% endif %}
+        <button class = "action-button" id = "seen-button" onclick="addToSeen()">Seen</button>
+        <button class = "action-button" id = "Must-button" onclick="addToMust()">Must Watch</button>
+        <button class = "action-button" id = "profile-button" onclick="profile()">Profile</button>
+        <button class = "action-button" id = "playlists-button" onclick="playlists()">Playlists</button>
+        <button class = "action-button" id = "feed-button" onclick="feed()">Feed</button>
     </header>
 
     <div class="section" style="margin-top: 185px;">
@@ -529,6 +465,11 @@
         <p>Runtime: {{content_details.runtime}} </p>
     </div>
 
+    <section class = "section">
+       <h2>Posters</h2>
+       <img id="poster" src="https://image.tmdb.org/t/p/w500{{ content_details.poster_path }}" alt="{{ content_details.title }} Poster" class="movie-poster">
+       <img id="background" src="https://image.tmdb.org/t/p/w500{{ content_details.backdrop_path }}" alt="{{ content_details.title }} Background" class="movie-background">
+    </section>
     <section class="section">
         <h2>Genres</h2>
         <ul>
@@ -680,7 +621,16 @@
                 MovieCount.innerHTML = `<strong>Movies:</strong> ${playlist.movie_count}`;
 
                 listItem.addEventListener('click', function () {
-                    addMovie(playlist.id)
+                    // Remove the 'selected' class from all playlist cards
+                    document.querySelectorAll('.playlist-list-item').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+        
+                    // Add the 'selected' class to the clicked playlist card
+                    listItem.classList.add('selected');
+        
+                    // Call the addMovie function with the playlist ID
+                    addMovie(playlist.id);
                 });
                 PlaylistCardContent.appendChild(PlayListTitle);
                 PlaylistCardContent.appendChild(MovieCount);
@@ -752,6 +702,10 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data.message);
+                    if (data.message === 'Added to playlist') {
+                        // If the request is successful, add the 'clicked' class to the "Seen" button
+                        document.getElementById('seen-button').classList.add('clicked');
+                    }
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
         }
@@ -766,20 +720,10 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data.message);
-                })
-                .catch(error => console.error('Error adding to playlist:', error));
-        }
-
-        function addToTrack(){
-            const queryString = window.location.search;
-            const urlParams = new URLSearchParams(queryString);
-            const MovieId = urlParams.get('id');
-            const type = urlParams.get('type');
-            const url = '{% url "movies:Add_tracking" %}' + `?movie_id=${MovieId}`
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data.message);
+                    if (data.message === 'Added to playlist') {
+                        // If the request is successful, add the 'clicked' class to the "Must Watch" button
+                        document.getElementById('Must-button').classList.add('clicked');
+                    }
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
         }

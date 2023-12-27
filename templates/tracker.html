@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Episode List</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #141414;
+            color: #fff;
+        }
+
+        header {
+            text-align: center;
+            background-color: #333;
+            padding: 10px;
+            margin-bottom: 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        h1 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .episode-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .episode-item {
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .episode-content {
+            padding: 10px;
+        }
+
+        .episode-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #e50914;
+            margin-bottom: 10px;
+        }
+
+        .episode-synopsis {
+            margin-bottom: 10px;
+        }
+
+        .episode-details {
+            font-style: italic;
+        }
+
+        /* Add other styles as needed */
+    </style>
+    <!-- Add your other stylesheets if needed -->
+</head>
+<body>
+    <header>
+        <h1>Episode List</h1>
+        <!-- Add any other header content as needed -->
+    </header>
+
+    <section class="section" id="episodes">
+        <ul class="episode-list">
+            {% for item in data %}
+                <li class="episode-item">
+                    <div class="episode-content" onclick="show('{{item.content_id}}')">
+
+                        <div class="episode-title">{{ item.title }}</div>
+                        <div class="episode-synopsis">{{ item.synopsis }}</div>
+                        <div class="episode-details">
+                            Episode: {{ item.episode }} | Season: {{ item.season }} | Content ID: {{ item.content_id }}
+                            {% if item.show %}
+                                | Show: {{ item.show }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+    <script>
+        function show(ID){
+            window.location.href = '{% url "movies:movie_details" %}' + `?id=${ID}&type=tv`
+        }
+    </script>
+</body>
+</html>

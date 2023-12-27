@@ -18,13 +18,13 @@ from .views import(
                    MovieDisLikeView,
                    AddtoSeenPlaylistView,
                    AddtoMustWatchPlaylistView,
-                   AddtoTrackingPlaylistView,
                    TrendingMediaView,
                    UpcomingReleaseView,
                    ReactMovieView,
                    RateMovieView,
                    AddTrackObjectView,
-                   GetVideosView
+                   GetVideosView,
+                   GetTrackedObjectsView
                    )
 
 
@@ -48,11 +48,11 @@ urlpatterns = [
     path('dislike_movie/',MovieDisLikeView.as_view(),name = "Dislike"),
     path('add_to_scene/',AddtoSeenPlaylistView.as_view(),name = "Add_scene"),
     path('add_to_must/',AddtoMustWatchPlaylistView.as_view(),name = "Add_must"),
-    path('add_to_track/',AddtoTrackingPlaylistView.as_view(),name = "Add_tracking"),
     path('trending/',TrendingMediaView.as_view(),name = "Trending"),
     path('upcoming/',UpcomingReleaseView.as_view(),name = "Upcoming"),
     path('rate/',RateMovieView.as_view(),name = "rate"),
     path('react/',ReactMovieView.as_view(),name = "react"),
     path('track/',AddTrackObjectView.as_view(),name = "track"),
+    path('get_tracked/',GetTrackedObjectsView.as_view(),name = "tracked"),
     path('videos/',GetVideosView.as_view(),name = "videos")
 ]
