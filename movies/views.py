@@ -130,10 +130,6 @@ class movie_details(APIView):
         movie,created = Movies.objects.get_or_create(content_id = content_id,content_type = content_type)
         if "budget" in content_details:
             movie.budget = content_details["budget"]
-        if "genres" in content_details:
-            for g in content_details["genres"]:
-              if "name" in g:
-                movie.genre += g["name"] + ","
         if "original_language" in content_details:
             movie.language = content_details["original_language"]
         if "title" in content_details:
@@ -142,10 +138,6 @@ class movie_details(APIView):
             movie.overview = content_details["overview"]
         if "release_date" in content_details:
             movie.release_date = content_details["release_date"]
-        if "production_companies" in content_details:
-            for p in content_details["production_companies"]:
-              if "name" in p:
-                movie.production_companies += p["name"] + ","
         if "revenue" in content_details:
             movie.revenue = content_details["revenue"]
         if "runtime" in content_details:
@@ -161,6 +153,8 @@ class movie_details(APIView):
                  movie.trailer_link = results[0]["key"]
         if "credits" in content_details:
             movie.cast_and_crew = content_details["credits"]
+        movie.genre = ",".join([g["name"] for g in content_details.get("genres", [])])
+        movie.production_companies = ",".join([p["name"] for p in content_details.get("production_companies", [])])
         movie.save()
         count = MoviesLikes.objects.filter(liked_on = movie).count()
         dis_like_count = MoviesDisLikes.objects.filter(liked_on = movie).count()
@@ -171,28 +165,6 @@ class movie_details(APIView):
         content_details['rated'] = rating.rating
         content_details['reacted'] = reaction.reaction
         if content_type == 'tv':
-            # Add videos for each episode
-            for season in content_details.get('seasons', []):
-                season_number = season.get('season_number')
-                if season_number is not None:
-                    season_url = f'https://api.themoviedb.org/3/tv/{content_id}/season/{season_number}?api_key={api_key}&append_to_response=videos'
-                    season_response = requests.get(season_url)
-                    season_response.raise_for_status()
-                    season_data = season_response.json()
-                    season['episodes'] = season_data.get('episodes', [])
-
-                     # Add videos for each episode
-                    for episode in season['episodes']:
-                        episode_number = episode.get('episode_number')
-                        if episode_number is not None:
-                            episode_url = f'https://api.themoviedb.org/3/tv/{content_id}/season/{season_number}/episode/{episode_number}?api_key={api_key}&append_to_response=videos'
-                            episode_response = requests.get(episode_url)
-                            episode_response.raise_for_status()
-                            episode_data = episode_response.json()
-                            episode['videos'] = episode_data.get('videos', {})
-                            episode['synopsis'] = episode_data.get('overview', '')  # Add episode synopsis
-                            episode['episode_number'] = episode_number  # Add episode number
-            
             #return Response({"data":content_details})
             return render(request, 'series.html', {'content_details': content_details})
                     
@@ -609,3 +581,36 @@ class AddTrackObjectView(APIView):
         track.episode = episode
         track.save()
         return Response({"message":"Success"})
+
+class GetVideosView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,*args, **kwargs):
+        api_key = settings.API_KEY_TMDB       
+        content_id = self.request.query_params.get('id')
+        tmdb_url = f'https://api.themoviedb.org/3/tv/{content_id}?api_key={api_key}&append_to_response=videos,credits'
+        response = requests.get(tmdb_url)
+        response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
+        content_details = response.json()
+        for season in content_details.get('seasons', []):
+                season_number = season.get('season_number')
+                if season_number is not None:
+                    season_url = f'https://api.themoviedb.org/3/tv/{content_id}/season/{season_number}?api_key={api_key}&append_to_response=videos'
+                    season_response = requests.get(season_url)
+                    season_response.raise_for_status()
+                    season_data = season_response.json()
+                    season['episodes'] = season_data.get('episodes', [])
+
+                     # Add videos for each episode
+                    for episode in season['episodes']:
+                        episode_number = episode.get('episode_number')
+                        if episode_number is not None:
+                            episode_url = f'https://api.themoviedb.org/3/tv/{content_id}/season/{season_number}/episode/{episode_number}?api_key={api_key}&append_to_response=videos'
+                            episode_response = requests.get(episode_url)
+                            episode_response.raise_for_status()
+                            episode_data = episode_response.json()
+                            episode['videos'] = episode_data.get('videos', {})
+                            episode['synopsis'] = episode_data.get('overview', '')  # Add episode synopsis
+                            episode['episode_number'] = episode_number  # Add episode number
+        return render(request,'videos.html',{"content_details":content_details})
+            
+        

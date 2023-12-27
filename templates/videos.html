@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Season Details</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #141414;
+            color: #fff;
+        }
+
+        header {
+            text-align: center;
+            background-color: #333;
+            padding: 10px;
+            margin-bottom: 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        h1 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .section {
+            margin-top: 20px;
+        }
+
+        .season-item {
+            margin-bottom: 20px;
+        }
+
+        .season-button {
+            background-color: #e50914;
+            color: #fff;
+            padding: 8px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .season-content {
+            display: block; /* Show the content by default */
+        }
+
+        .episode-item {
+            margin-bottom: 10px;
+        }
+
+        .episode-card {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 315px;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Add other styles as needed */
+
+    </style>
+    <!-- Add your other stylesheets if needed -->
+</head>
+<body>
+    <header>
+        <h1>Season Details</h1>
+        <!-- Add any other header content as needed -->
+    </header>
+
+    <section class="section" id="seasons">
+        <h2>Seasons</h2>
+        {% for season in content_details.seasons %}
+            <div class="season-item">
+                <button class="season-button">Season {{ season.season_number }}</button>
+                <div class="season-content" id="season-{{ season.season_number }}">
+                    <ul class="episode-list">
+                        {% for episode in season.episodes %}
+                            <li class="episode-item">
+                                <div class="episode-card">
+                                    <strong>{{ episode.name }}</strong>
+                                    <p>Synopsis: {{ episode.synopsis }}</p>
+                                    <p>Running Time: {{ episode.runtime }}</p>
+                                    <p>Episode Number: {{ episode.episode_number }}</p>
+                                    {% if episode.videos.results %}
+                                        <iframe width="560" height="315" src="https://www.youtube.com/embed/{{ episode.videos.results.0.key }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                    {% else %}
+                                        No video available
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    </section>
+</body>
+</html>

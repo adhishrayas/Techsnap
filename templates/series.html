@@ -197,6 +197,57 @@
         .like-button:hover {
             background-color: #e50914;
         }
+
+        .hidden {
+            display: none;
+        }
+
+        .dropdown-button {
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-button:hover {
+            background-color: #e50914;
+        }
+
+        .video-dropdown {
+            position: relative;
+        }
+
+        .video-dropdown-content {
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 10px;
+        }
+
+        .video-dropdown-content div {
+            margin-bottom: 10px;
+        }
+
+        .video-dropdown-content div iframe {
+            width: 300px;
+            height: 200px;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-dropdown-content div p {
+            text-align: center;
+            max-width: 150px;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
@@ -314,6 +365,10 @@
         document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('rate-button').addEventListener('click', showRatingStars);
         });
+        function toggleVideoDropdown() {
+            const dropdownContent = document.getElementById('video-dropdown-content');
+            dropdownContent.classList.toggle('hidden');
+        }
        
     </script>
 </head>
@@ -337,9 +392,10 @@
     </header>
     <div id="detailsContainer">
 
-        <section class="section">
+        <section class="section" style="margin-top: 160px;">
             <h2>Overview</h2>
             <p>{{ content_details.overview }}</p>
+            <p>Language: {{content_details.original_language}}</p>
         </section>
 
         <section class="section">
@@ -360,48 +416,34 @@
             </ul>
         </section>
 
-        <section class="section" id="videos">
+        <div class="section">
             <h2>Videos</h2>
-            <ul>
-                {% for video in content_details.videos.results %}
-                    <li class="video-item">
-                        <strong>{{ video.name }}</strong>
-                        <br>
-                        <iframe width="560" height="315" src="https://www.youtube.com/embed/{{ video.key }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                    </li>
-                {% endfor %}
-            </ul>
-        </section>
-
-        <!-- ... (previous HTML code) ... -->
-
-       <section class="section" id="seasons">
-        <h2>Seasons</h2>
-     {% for season in content_details.seasons %}
-        <div class="season-item">
-            <button class="season-button" onclick="toggleSeason('{{ season.name }}')">Season {{ season.season_number }}</button>
-            <div class="season-content" id="season-{{ season.name }}">
-                <ul class="episode-list">
-                    {% for episode in season.episodes %}
-                        <li class="episode-item" onclick="playEpisode('{{ episode.name }}', '{{ episode.synopsis }}', '{{ episode.running_time }}', {{ episode.episode_number }})">
-                            <div class="episode-card">
-                                <strong>{{ episode.name }}</strong>
-                                <p>Synopsis: {{ episode.synopsis }}</p>
-                                <p>Running Time: {{ episode.running_time }}</p>
-                                <p>Episode Number: {{ episode.episode_number }}</p>
-                                {% if episode.videos.results %}
-                                    <iframe width="560" height="315" src="https://www.youtube.com/embed/{{ episode.videos.results.0.key }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                                {% else %}
-                                    No video available
-                                {% endif %}
-                            </div>
-                        </li>
+            <div class="video-dropdown">
+                <button id="video-dropdown-btn" class="dropdown-button" onclick="toggleVideoDropdown()">Show Videos</button>
+                <div id="video-dropdown-content" class="video-thumbnails hidden">
+                    {% for video in content_details.videos.results %}
+                        <div>
+                            <iframe width="300" height="200" src="https://www.youtube.com/embed/{{ video.key }}" frameborder="0"
+                                    allowfullscreen></iframe>
+                            <p>{{ video.name }}</p>
+                        </div>
                     {% endfor %}
-                </ul>
+                </div>
             </div>
         </div>
-    {% endfor %}
-</section>
+        
+        <!-- ... (previous HTML code) ... -->
+
+        <section class="section" id="seasons">
+            <h2>Seasons</h2>
+                <div class="season-item">
+                    <a href="{% url 'movies:videos' %}?id={{content_details.id}}" class="season-button">
+                        Watch Episodes
+                    </a>
+                    <!-- Add other season details if needed -->
+                </div>
+        </section>
+        
 
 <!-- ... (remaining HTML code) ... -->
 
@@ -448,9 +490,6 @@
         </section>
 
     </div>
-    <footer>
-        <p>&copy; Techsnap. All rights reserved.</p>
-    </footer>
     <div id="playlistPopup">
         <ul id="play-list" class="playlist-list"></ul>
         <span class="close-popup" onclick="closePopup()">Close</span>
