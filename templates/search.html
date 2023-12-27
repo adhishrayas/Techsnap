@@ -149,13 +149,14 @@
 
                         // Check if the title is defined and not null
                         if (result.title !== undefined ) {
+                            console.log(result)
                             var contenttype = result.content_type
                             var resultHtml = '<div class="result-card" data-id="' + result.id + '" data-content-type="' + contenttype + '">';
                             resultHtml += '<p><strong>' + result.title + '</strong></p>';
-                            if (result.release_date !== null){
-                            resultHtml += '<p>Release Date: ' + (result.release_date || 'N/A') + '</p>';
-                            }else{
-                                resultHtml += '<p>Release Date:' + (result.first_air_date) + '</p>';
+                            if (contentType === 'movie') {
+                                resultHtml += '<p style="margin: 0; font-size: 12px;">Release Date: ' + (result.release_date || 'N/A') + '</p>';
+                            } else if (contentType === 'tv') {
+                                resultHtml += '<p style="margin: 0; font-size: 12px;">Release Date: ' + (result.first_air_date || 'N/A') + '</p>';
                             }
                             resultHtml += '<p>' + (result.overview || 'No overview available.') + '</p>';
 
@@ -205,7 +206,12 @@
                         resultHtml += '<img class="result-poster" src="' + (result.poster_url || '') + '" alt="Result Poster">';
                         resultHtml += '<div>';
                         resultHtml += '<p style="margin: 0;">' + result.title + '</p>';
-                        resultHtml += '<p style="margin: 0; font-size: 12px;">Release Date: ' + (result.release_date || 'N/A') + '</p>';
+                        if (contentType === 'movie') {
+                            resultHtml += '<p style="margin: 0; font-size: 12px;">Release Date: ' + (result.release_date || 'N/A') + '</p>';
+                        } else if (contentType === 'tv') {
+                            resultHtml += '<p style="margin: 0; font-size: 12px;">Release Date: ' + (result.first_air_date || 'N/A') + '</p>';
+                        }
+                        //resultHtml += '<p style="margin: 0; font-size: 12px;">Release Date: ' + (result.release_date || 'N/A') + '</p>';
                         resultHtml += '</div>';
                         resultHtml += '</div>';
                         searchResultsDiv.append(resultHtml); // Corrected variable name
