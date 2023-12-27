@@ -51,7 +51,7 @@
 
     <div id="results">
         <!-- Results will be dynamically inserted here using Django template tags -->
-        {% for result in api_response.results %}
+        {% for result in movies %}
             <div class="result-card" onclick="handleResultClick('{{ result.id }}','{{result.content_type}}')" data-id="{{ result.id }}">
                 <p><strong>{{ result.title }}</strong></p>
                 <p>Release Date: {{ result.release_date }}</p>

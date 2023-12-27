@@ -173,29 +173,40 @@
             color: #e50914; /* Netflix red */
         }
 
+        .action-button,
+        .like-button,
         .profile-button,
         .playlists-button,
+        .dislike-button,
+        .Track-button,
+        .Must-button,
         .seen-button,
-        .must-button,
-        .track-button,
-        .disliked-button,
-        .like-button {
-            background-color: #3498db;
-            color: #fff;
+        .playlist-button,
+        #rate-button,
+        #feed-button,
+        #reaction-button {
+            background-color: #e50914; /* Red color */
+            color: #fff; /* White text color */
             padding: 8px 12px;
             text-decoration: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
-
-        .profile-button,
-        .playlists-button,
-        .seen-button,
-        .must-button,
-        .track-button,
-        .disliked-button,
-        .like-button:hover {
-            background-color: #e50914;
+        
+        .action-button:hover,
+        .like-button:hover,
+        .profile-button:hover,
+        .playlists-button:hover,
+        .dislike-button:hover,
+        .Track-button:hover,
+        .Must-button:hover,
+        .seen-button:hover,
+        .playlist-button:hover,
+        #rate-button:hover,
+        #feed-button:hover,
+        #reaction-button:hover {
+            background-color: #e50914; /* Darker red on hover */
         }
 
         .hidden {
@@ -260,6 +271,15 @@
             max-width: 100%;
             height: auto;
             /* Add any additional styles for the background image */
+        }
+        #seen-button.clicked,
+        #Must-button.clicked {
+           background-color: #4CAF50; /* Green color */
+        }
+
+        #seen-button.clicked:hover,
+        #Must-button.clicked:hover {
+            background-color: #45a049; /* Darker green on hover */
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -388,7 +408,7 @@
 <body>
     <header>
         <h1>{{ content_details.name }} Details</h1>
-        <button id="playlist-button" onclick="showPlaylists()">Add To Playlist</button>
+        <button class = "action-button" id="playlist-button" onclick="showPlaylists()">Add To Playlist</button>
         <a class="like-button" href="#" data-post-id="{{ content_details.id }}">Like</a>
         <span id="likes-{{ content_details.id }}" class="likes"><strong>Likes:</strong> {{ content_details.like }}</span> |
         <a class="disliked-button" href="#" data-post-id="{{ content_details.id }}">DisLike</a>
@@ -397,10 +417,11 @@
         <span id="rating-{{ content_details.id }}" class="rating"><strong>Rating:</strong> {{ content_details.rated}}</span> | 
         <span id="reaction-{{ content_details.id }}" class="reaction"><strong>Reaction:</strong></span>
         <span id="reacted-emoji" class="emoji" data-emoji-value="{{ content_details.reacted }}" onclick="showReactionPopup()"></span> |
-        <button id = "seen-button" onclick="addToSeen()">Seen</button>
-        <button id = "Must-button" onclick="addToMust()">Must Watch</button>
-        <button id = "profile-button" onclick="profile()">Profile</button>
-        <button id = "playlists-button" onclick="playlists()">Playlists</button>
+        <button class = "action-button" id = "seen-button" onclick="addToSeen()">Seen</button>
+        <button class = "action-button" id = "Must-button" onclick="addToMust()">Must Watch</button>
+        <button class = "action-button" id = "profile-button" onclick="profile()">Profile</button>
+        <button class = "action-button" id = "playlists-button" onclick="playlists()">Playlists</button>
+        <button class = "action-button" id = "feed-button" onclick="feed()">Feed</button>
     </header>
     <div id="detailsContainer">
 
@@ -479,7 +500,10 @@
                     <h3>Cast</h3>
                     <ul>
                         {% for cast_member in content_details.credits.cast %}
-                            <li>{{ cast_member.name }} as {{ cast_member.character }}</li>
+                        <li>  <a href="{% url 'movies:person' %}?query={{cast_member.name}}">
+                            {{ cast_member.name }}
+                        </a> as {{ cast_member.character }}
+                       </li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -487,7 +511,9 @@
                     <h3>Crew</h3>
                     <ul>
                         {% for crew_member in content_details.credits.crew %}
-                            <li>{{ crew_member.name }} - {{ crew_member.job }}</li>
+                        <li> <a href="{% url 'movies:person'%}?query={{crew_member.name}}">
+                            {{ crew_member.name }}
+                        </a>  - {{ crew_member.job }}</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -686,6 +712,10 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data.message);
+                    if (data.message === 'Added to playlist') {
+                        // If the request is successful, add the 'clicked' class to the "Seen" button
+                        document.getElementById('seen-button').classList.add('clicked');
+                    }
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
         }
@@ -700,6 +730,10 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data.message);
+                    if (data.message === 'Added to playlist') {
+                        // If the request is successful, add the 'clicked' class to the "Must Watch" button
+                        document.getElementById('Must-button').classList.add('clicked');
+                    }
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
         }
@@ -710,6 +744,16 @@
 
         function allPlaylist(){
             window.location.href = '{% url "movies:my_playlists" %}'
+        }
+        function playlists(){
+            window.location.href = '{% url "movies:my_playlists" %}'
+        }
+        function feed(){
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const type = urlParams.get('type');
+            window.location.href = '{% url "posts:movie_feed" %}' + `?content_id=${MovieId}` + `&content_type=${type}`;
         }
     </script>
 </body>

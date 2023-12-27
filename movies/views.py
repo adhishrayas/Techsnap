@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db import transaction
-from .models import MoviesLikes,Movies,Playlists,MoviesDisLikes,Ratings,Reaction,TrackObject
+from .models import MoviesLikes,Movies,Playlists,MoviesDisLikes,Ratings,Reaction,TrackObject,CastObjects,CrewObjects
 from .serializers import PlayListSerializer,PlaylistMiniSerializer,TrackerSerializer
 from auth_modules.models import UserFollowing
 from rest_framework import status
@@ -133,6 +133,18 @@ class movie_details(APIView):
                  movie.trailer_link = results[0]["key"]
         if "credits" in content_details:
             movie.cast_and_crew = content_details["credits"]
+            if "cast" in content_details["credits"]:
+                c = content_details["credits"]["cast"]
+                for a in c:
+                    cast,created = CastObjects.objects.get_or_create(name = a["name"])
+                    if "title" in content_details:
+                       cast.content += content_details["title"] + ','
+            if "crew" in content_details["credits"]:
+                cr = content_details["credits"]["crew"]
+                for a in cr:
+                    crew,created = CrewObjects.objects.get_or_create(name = a["name"])
+                    if "title" in content_details:
+                       crew.content += content_details["title"]
         movie.genre = ",".join([g["name"] for g in content_details.get("genres", [])])
         movie.production_companies = ",".join([p["name"] for p in content_details.get("production_companies", [])])
         movie.save()
@@ -151,7 +163,7 @@ class movie_details(APIView):
     except requests.exceptions.RequestException as e:
         # Handle API request errors, you might want to log the error or show an error page
         return Response({'error_message': f'Error fetching content details: {str(e)}'})
-    #return Response({'content_details':content_details})
+    return Response({'content_details':content_details})
     return render(request,'movie_details.html',{'content_details': content_details})
 
 class MovieLikeView(APIView):
@@ -585,3 +597,23 @@ class GetTrackedObjectsView(APIView):
             serializer = TrackerSerializer(t)
             data.append(serializer.data)
         return render(request,'tracker.html',{"data":data})
+    
+class GetbyPersonView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,*args, **kwargs):
+        query = self.request.query_params.get('query')
+        if query:
+            api_key = settings.API_KEY_TMDB
+            base_url = 'https://api.themoviedb.org/3'
+            search_person_url = f'{base_url}/search/person?api_key={api_key}&query={query}'
+            response = requests.get(search_person_url)
+            person_data = response.json()
+            if person_data['results']:
+                person_id = person_data['results'][0]['id']
+                person_movie_credits_url = f'{base_url}/person/{person_id}/movie_credits?api_key={api_key}'
+                movie_credits_response = requests.get(person_movie_credits_url)
+                movie_credits_data = movie_credits_response.json()
+                movies = movie_credits_data.get('cast', []) + movie_credits_data.get('crew', [])
+                #return Response({"movies":movies})
+                return  render(request,'people_movies.html',{'movies': movies, 'person_name': query})
+        #return render(request, 'movies/search_form.html')

@@ -520,7 +520,10 @@
             <summary>Cast</summary>
             <ul>
                 {% for cast_member in content_details.credits.cast %}
-                <li>{{ cast_member.name }} as {{ cast_member.character }}</li>
+                <li>  <a href="{% url 'movies:person' %}?query={{cast_member.name}}">
+                    {{ cast_member.name }}
+                </a> as {{ cast_member.character }}
+               </li>
                 {% endfor %}
             </ul>
         </details>
@@ -529,7 +532,9 @@
             <summary>Crew</summary>
             <ul>
                 {% for crew_member in content_details.credits.crew %}
-                <li>{{ crew_member.name }} - {{ crew_member.job }}</li>
+                <li> <a href="{% url 'movies:person'%}?query={{crew_member.name}}">
+                    {{ crew_member.name }}
+                </a>  - {{ crew_member.job }}</li>
                 {% endfor %}
             </ul>
         </details>

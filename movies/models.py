@@ -28,7 +28,6 @@ class Movies(models.Model):
     content_type = models.CharField(max_length = 255,default ='')
     trailer_link = models.CharField(max_length = 255,default = '')
     genre = models.TextField(default = '')
-    cast_and_crew = models.JSONField(null = True,blank = True)
     production_companies = models.TextField(default = '')
     @property
     def total_rating(self):
@@ -113,3 +112,23 @@ class TrackObject(models.Model):
     title = models.CharField(max_length = 255,blank = True,null = True)
     synopsis = models.TextField(blank = True,null =True)
     show = models.CharField(max_length = 255,blank = True,null = True)
+
+
+class CastObjects(models.Model):
+    id = models.UUIDField(
+        default = uuid.uuid4,
+        primary_key = True,
+        editable = False,
+    )
+    content = models.TextField(default = '')
+    name = models.CharField(max_length = 255,blank = True,null = True)
+
+class CrewObjects(models.Model):
+    id = models.UUIDField(
+        default = uuid.uuid4,
+        primary_key = True,
+        editable = False,
+    )
+    name = models.CharField(max_length = 255,blank = True,null = True)
+    content = models.TextField(default = '')
+    

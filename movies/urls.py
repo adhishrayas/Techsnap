@@ -24,7 +24,8 @@ from .views import(
                    RateMovieView,
                    AddTrackObjectView,
                    GetVideosView,
-                   GetTrackedObjectsView
+                   GetTrackedObjectsView,
+                   GetbyPersonView
                    )
 
 
@@ -54,5 +55,6 @@ urlpatterns = [
     path('react/',ReactMovieView.as_view(),name = "react"),
     path('track/',AddTrackObjectView.as_view(),name = "track"),
     path('get_tracked/',GetTrackedObjectsView.as_view(),name = "tracked"),
-    path('videos/',GetVideosView.as_view(),name = "videos")
+    path('videos/',GetVideosView.as_view(),name = "videos"),
+    path('get_by_person/',GetbyPersonView.as_view(),name = "person")
 ]

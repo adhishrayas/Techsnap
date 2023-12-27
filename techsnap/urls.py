@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.urls import path,include
 from django.conf.urls.static import static
+from .views import redirect_to_specific_url
 from drf_yasg.views import get_schema_view
 from rest_framework.permissions import AllowAny
 from drf_yasg import openapi
@@ -38,6 +39,7 @@ schema_view = get_schema_view(
 handler404 = 'techsnap.views.custom_404'
 urlpatterns = [
     path('admin/', admin.site.urls),
+     path('', redirect_to_specific_url,name = "Signup"),
     path('accounts/',include('auth_modules.urls'),name = "Auth Module"),
     path('posts/',include('notifications.urls'),name='post'),
     path('movies/',include('movies.urls'),name = 'movies'),

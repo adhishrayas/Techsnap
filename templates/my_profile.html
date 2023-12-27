@@ -259,6 +259,7 @@
             background-color: #b5070d; /* Darker shade of red on hover */
         }
 
+        #Home-button,
         #notifications-button,
         #settings-button {
             background-color: #e50914; /* Netflix red */
@@ -271,6 +272,7 @@
             margin-bottom: 10px;
         }
 
+        #Home-button:hover,
         #notifications-button:hover,
         #settings-button:hover {
             background-color: #b5070d; /* Darker shade of red on hover */
@@ -365,6 +367,7 @@
                   <button id="search-user-button" onclick="searchuser()">Search User</button>
                   <button id="settings-button" onclick="settings()">Settings</button>
                   <button id="notifications-button" onclick="notifications()">Notifications</button>
+                  <button id="Home-button" onclick="Home()">Home</button>
                {% endif %}
            </h1>
         </header>
@@ -566,7 +569,9 @@
         function notifications(){
             window.location.href = '{% url "posts:unseen_likes" %}'
         }
-        
+        function Home(){
+            window.location.href = '{% url "posts:feed" %}'
+        }
     </script>
 </body>
 </html>
