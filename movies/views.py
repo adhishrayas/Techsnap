@@ -597,7 +597,7 @@ class GetTrackedObjectsView(APIView):
             serializer = TrackerSerializer(t)
             data.append(serializer.data)
         return render(request,'tracker.html',{"data":data})
-    
+''''
 class GetbyPersonView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self,request,*args, **kwargs):
@@ -608,12 +608,68 @@ class GetbyPersonView(APIView):
             search_person_url = f'{base_url}/search/person?api_key={api_key}&query={query}'
             response = requests.get(search_person_url)
             person_data = response.json()
+            #return Response({"data":person_data})
             if person_data['results']:
                 person_id = person_data['results'][0]['id']
                 person_movie_credits_url = f'{base_url}/person/{person_id}/movie_credits?api_key={api_key}'
                 movie_credits_response = requests.get(person_movie_credits_url)
                 movie_credits_data = movie_credits_response.json()
                 movies = movie_credits_data.get('cast', []) + movie_credits_data.get('crew', [])
-                #return Response({"movies":movies})
-                return  render(request,'people_movies.html',{'movies': movies, 'person_name': query})
+                return Response({"movies":movies})
+                #return  render(request,'people_movies.html',{'movies': movies, 'person_name': query})
         #return render(request, 'movies/search_form.html')
+'''
+class GetbyPersonView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get_movie_credits(self, person_id, api_key):
+        base_url = 'https://api.themoviedb.org/3'
+        movie_credits_url = f'{base_url}/person/{person_id}/movie_credits?api_key={api_key}'
+        response = requests.get(movie_credits_url)
+        return response.json().get('cast', []) + response.json().get('crew', [])
+
+    def get_tv_credits(self, person_id, api_key):
+        base_url = 'https://api.themoviedb.org/3'
+        tv_credits_url = f'{base_url}/person/{person_id}/tv_credits?api_key={api_key}'
+        response = requests.get(tv_credits_url)
+        return response.json().get('cast', []) + response.json().get('crew', [])
+
+    def get(self, request, *args, **kwargs):
+        query = self.request.query_params.get('query')
+        if query:
+            api_key = settings.API_KEY_TMDB
+            base_url = 'https://api.themoviedb.org/3'
+            search_person_url = f'{base_url}/search/person?api_key={api_key}&query={query}'
+            response = requests.get(search_person_url)
+            person_data = response.json()
+
+            if person_data['results']:
+                person_id = person_data['results'][0]['id']
+                
+                # Get movie credits
+                movie_credits = self.get_movie_credits(person_id, api_key)
+                
+                # Get TV credits
+                tv_credits = self.get_tv_credits(person_id, api_key)
+
+                # Combine results
+                credits = movie_credits + tv_credits
+
+                # Create a list of dictionaries containing details for each item
+                result = []
+                for credit in credits:
+                    content_type = 'movie' if 'title' in credit else 'tv'
+                    credit_info = {
+                        'id': credit.get('id'),
+                        'title': credit.get('title') if content_type == 'movie' else credit.get('name'),
+                        'content_type': content_type,
+                        'poster_path': credit.get('poster_path'),
+                        'overview': credit.get('overview'),
+                        'release_date': credit.get('release_date') if content_type == 'movie' else None,
+                        # Add other relevant fields as needed
+                    }
+                    result.append(credit_info)
+                return  render(request,'people_movies.html',{'movies': result, 'person_name': query})
+                return Response({"credits": result})
+                
+        return Response({"credits": []})
