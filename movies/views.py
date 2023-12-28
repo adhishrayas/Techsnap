@@ -148,6 +148,30 @@ class movie_details(APIView):
                        crew.content += content_details["title"]
         movie.genre = ",".join([g["name"] for g in content_details.get("genres", [])])
         movie.production_companies = ",".join([p["name"] for p in content_details.get("production_companies", [])])
+        if content_type == "tv":
+            tv_info = {}
+            for season in content_details.get('seasons', []):
+                season_number = season.get('season_number')
+                if season_number is not None:
+                    season_url = f'https://api.themoviedb.org/3/tv/{content_id}/season/{season_number}?api_key={api_key}&append_to_response=videos'
+                    season_response = requests.get(season_url)
+                    season_response.raise_for_status()
+                    season_data = season_response.json()
+                    season['episodes'] = season_data.get('episodes', [])
+                    season_info = []
+                    for episode in season['episodes']:
+                        episode_number = episode.get('episode_number')
+                        if episode_number is not None:
+                            episode_url = f'https://api.themoviedb.org/3/tv/{content_id}/season/{season_number}/episode/{episode_number}?api_key={api_key}&append_to_response=videos'
+                            episode_response = requests.get(episode_url)
+                            episode_response.raise_for_status()
+                            episode_data = episode_response.json()
+                            #episode['videos'] = episode_data.get('videos', {})
+                            episode['synopsis'] = episode_data.get('overview', '') 
+                            episode['episode_number'] = episode_number 
+                            season_info.append(episode)
+                    tv_info[f'{season_number}'] = season_info
+            movie.episodes = tv_info
         movie.save()
         count = MoviesLikes.objects.filter(liked_on = movie).count()
         dis_like_count = MoviesDisLikes.objects.filter(liked_on = movie).count()
@@ -579,8 +603,9 @@ class AddTrackObjectView(APIView):
         Show = self.request.query_params.get('Title')
         user = self.request.user
         try:
-            track = TrackObject.objects.get(content_id = content_id,owner = user,episode = episode,season = season,title = title,synopsis = synopsis,show = Show)
-            return Response({"message":"Success"})
+           track = TrackObject.objects.get(content_id = content_id,owner = user,episode = episode,season = season,title = title,synopsis = synopsis,show = Show)
+           track.delete()
+           return Response({"message":"Success"})
         except:
             track = TrackObject.objects.create(content_id = content_id,owner = user, season = season,episode = episode,title = title,synopsis = synopsis,show = Show)
             return Response({"message":"Success"})
@@ -612,6 +637,11 @@ class GetVideosView(APIView):
                             episode['videos'] = episode_data.get('videos', {})
                             episode['synopsis'] = episode_data.get('overview', '') 
                             episode['episode_number'] = episode_number 
+                            try:
+                                track = TrackObject.objects.get(content_id = content_id,owner = self.request.user,episode = episode_number,season=season_number)
+                                episode['tracked'] = True
+                            except:
+                                episode['tracked'] = False
         return render(request,'videos.html',{"content_details":content_details})
             
 class GetTrackedObjectsView(APIView):

@@ -29,6 +29,7 @@ class Movies(models.Model):
     trailer_link = models.CharField(max_length = 255,default = '')
     genre = models.TextField(default = '')
     production_companies = models.TextField(default = '')
+    episodes = models.JSONField(null = True,blank = True)
     @property
     def total_rating(self):
         if self.rated_by == 0:

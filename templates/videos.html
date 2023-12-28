@@ -86,7 +86,13 @@
         #tick-mark-button.clicked:hover {
             background-color: #45a049; /* Darker green on hover */
         }
+        .tick-mark-button.seen {
+            background-color: #4CAF50; /* Green color */
+        }
 
+        .tick-mark-button.unseen {
+            background-color: #e50914; /* Red color */
+        }
         /* Add other styles as needed */
 
     </style>
@@ -108,7 +114,7 @@
                         {% for episode in season.episodes %}
                             <li class="episode-item">
                                 <div class="episode-card">
-                                    <button class="tick-mark-button" id = "tick-mark-button" onclick="addToTrack('{{episode.episode_number}}','{{season.season_number}}','{{episode.name}}','{{episode.synopsis}}','{{content_details.title}}')">&#10003;</button>
+                                    <button class="tick-mark-button {% if episode.tracked %}seen{% else %}unseen{% endif %}" onclick="addToTrack(this, '{{episode.episode_number}}', '{{season.season_number}}', '{{episode.name}}', '{{episode.synopsis}}', '{{content_details.title}}')">&#10003;</button>
                                     <strong>{{ episode.name }}</strong>
                                     <p>Synopsis: {{ episode.synopsis }}</p>
                                     <p>Running Time: {{ episode.runtime }}</p>
@@ -127,19 +133,18 @@
         {% endfor %}
     </section>
     <script>
-    function addToTrack(ep,season,title,synopsis,Title){
+    function addToTrack(button,ep,season,title,synopsis,Title){
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         const MovieId = urlParams.get('id');
-        const tickMarkButton = document.getElementById('tick-mark-button');
         const url = '{% url "movies:track" %}' + `?id=${MovieId}&ep=${ep}&season=${season}&title=${title}&synopsis=${synopsis}&show=${Title}` 
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 console.log(data.message);
                 if (data.message === 'Success') {
-                    // If the request is successful, add the 'clicked' class to the "Seen" button
-                    tickMarkButton.style.backgroundColor = '#4CAF50'; // Green color
+                    button.classList.toggle('seen');
+                    button.classList.toggle('unseen');
                 }
             })
             .catch(error => console.error('Error adding to playlist:', error));
