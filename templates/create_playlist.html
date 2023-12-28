@@ -108,19 +108,34 @@
         document.getElementById('playlist-form').addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent the default form submission behavior
     
-            // Your existing form submission logic, e.g., using fetch
-            fetch('{% url "movies:create_playlist" %}', {
+            url = '{% url "movies:create_playlist" %}';
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const cidexists = urlParams.has('id')
+            if (cidexists) {
+                const cid = urlParams.get('id')
+                const ctype = urlParams.get('type')
+                url += `?cid=${cid}&ctype=${ctype}`;
+            }
+            fetch(url, {
                 method: 'POST',
                 body: new FormData(this),
             })
             .then(response => response.json())
             .then(data => {
                 // Assuming the response data contains the 'id' you want to use in the URL
-                const id = data.data.id;
-    
-                // Change the URL to your desired target with the 'id' query parameter
-                window.location.href = '{% url "movies:view_playlist" %}' + `?id=${id}`;
-            })
+                const playlistId = data.data.id;
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                const cidexists = urlParams.has('id')
+                let redirectUrl = '{% url "movies:view_playlist" %}' + `?id=${playlistId}`;
+                if(cidexists){
+                    const cid = urlParams.get('id')
+                    const ctype = urlParams.get('type')
+                    redirectUrl += `&cid=${cid}&ctype=${ctype}`;
+                }
+                window.location.href = redirectUrl;
+                })
             .catch(error => console.error('Error:', error));
         });
     </script>

@@ -223,6 +223,23 @@
         function searchMovie() {
             window.location.href = '{% url "movies:search_movies" %}'        
         }
+
+        function redirectAfterDelay(c,t){
+            var redirectURL = '{% url "movies:movie_details" %}'+ `?id=${c}&type=${t}`;  
+            setTimeout(function () {
+                window.location.href = redirectURL;
+            }, 1000);
+        }
+        window.onload = function(){
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const cidexists = urlParams.has('cid')
+            if (cidexists){
+                const cid = urlParams.get('cid')
+                const ctype = urlParams.get('ctype')
+                redirectAfterDelay(cid,ctype)
+            }
+        }
     </script>
 </body>
 </html>

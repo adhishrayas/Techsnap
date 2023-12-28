@@ -263,6 +263,13 @@ class CreatePlayListView(CreateAPIView):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+        playlist = serializer.instance
+        if self.request.query_params.get('cid') is not None:
+            id = self.request.query_params.get('cid')
+            type = self.request.query_params.get('ctype')
+            movie = Movies.objects.get(content_id=id,content_type = type)
+            playlist.movies.add(movie)
+            playlist.save()
         context = {"data":serializer.data}
         print(context)
         return Response(context)

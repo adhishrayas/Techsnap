@@ -594,6 +594,10 @@
         }
 
         function showPlaylistPopup(playlists) {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const type = urlParams.get('type');
             const popup = document.getElementById('playlistPopup');
             const PlayList = document.getElementById('play-list');
             PlayList.innerHTML = ''; // Clear previous content
@@ -601,7 +605,7 @@
             const createPlaylistButton = document.createElement('button');
             createPlaylistButton.textContent = 'Create Playlist';
             createPlaylistButton.addEventListener('click', function () {
-                createPlaylist()
+                createPlaylist(MovieId,type)
             });
             createPlaylistButton.classList.add('create-playlist-button');
             popup.insertBefore(createPlaylistButton, PlayList);
@@ -733,8 +737,8 @@
                 .catch(error => console.error('Error adding to playlist:', error));
         }
 
-        function createPlaylist(){
-            window.location.href = '{% url "movies:create_playlist" %}'
+        function createPlaylist(ID,type){
+            window.location.href = '{% url "movies:create_playlist" %}' + `?id=${ID}&type=${type}`
         }
 
         function profile(){
