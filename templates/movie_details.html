@@ -396,7 +396,6 @@
     
         function rateMovie(rating) {
             selectedRating = rating;
-            alert(`You rated the movie ${rating} stars!`); // You can replace this with your actual rating logic
     
             // Update UI to reflect the selected rating
             document.querySelectorAll('.star').forEach((star, index) => {
@@ -420,6 +419,8 @@
                 success: function (data) {
                     if (data && data.message === "success") {
                         console.log("Rating updated successfully");
+                        var ratingElement = $("#rating-" + MovieId);
+                        ratingElement.html("<strong>Rating:</strong> " + rating);
                     } else {
                         console.error("Invalid response format or rating not successful.");
                     }
@@ -696,7 +697,6 @@
         }
 
         function selectEmoji(emoji) {
-            alert(`You selected the reaction: ${emoji}`); 
             const emojiValue = event.target.getAttribute('data-emoji-value');
             const queryString = window.location.search;
             const urlParams = new URLSearchParams(queryString);
@@ -707,6 +707,8 @@
                .then(response => response.json())
                .then(data => {
                   console.log(data.message);
+                  const reactedEmojiElement = document.getElementById('reacted-emoji');
+                  setEmoji(reactedEmojiElement, emojiValue);
                 })
                .catch(error => console.error('Error reacting to movie:', error));
             closeReactionPopup();

@@ -330,7 +330,7 @@
             });
         });
         $(document).ready(function () {
-            $(".disliked-button").on("click", function (e) {
+            $(".dislike-button").on("click", function (e) {
                 e.preventDefault();
                 const queryString = window.location.search;
                 const urlParams = new URLSearchParams(queryString);
@@ -376,8 +376,6 @@
     
         function rateMovie(rating) {
             selectedRating = rating;
-            alert(`You rated the movie ${rating} stars!`); // You can replace this with your actual rating logic
-    
             // Update UI to reflect the selected rating
             document.querySelectorAll('.star').forEach((star, index) => {
                 star.classList.remove('active');
@@ -400,6 +398,8 @@
                 success: function (data) {
                     if (data && data.message === "success") {
                         console.log("Rating updated successfully");
+                        var ratingElement = $("#rating-" + MovieId);
+                        ratingElement.html("<strong>Rating:</strong> " + rating);
                     } else {
                         console.error("Invalid response format or rating not successful.");
                     }
@@ -428,10 +428,11 @@
         <button class = "action-button" id="playlist-button" onclick="showPlaylists()">Add To Playlist</button>
         <a class="like-button" href="#" data-post-id="{{ content_details.id }}">Like</a>
         <span id="likes-{{ content_details.id }}" class="likes"><strong>Likes:</strong> {{ content_details.like }}</span> |
-        <a class="disliked-button" href="#" data-post-id="{{ content_details.id }}">DisLike</a>
+        <a class="dislike-button" href="#" data-post-id="{{ content_details.id }}">DisLike</a>
         <span id="dislikes-{{ content_details.id }}" class="dislikes"><strong>DisLikes:</strong> {{ content_details.like }}</span> |
         <button id="rate-button" onclick="showRatingStars()">Rate</button>
         <span id="rating-{{ content_details.id }}" class="rating"><strong>Rating:</strong> {{ content_details.rated}}</span> | 
+        <button id="reaction-button" onclick="showReactionPopup()">Reaction</button>
         <span id="reaction-{{ content_details.id }}" class="reaction"><strong>Reaction:</strong></span>
         <span id="reacted-emoji" class="emoji" data-emoji-value="{{ content_details.reacted }}" onclick="showReactionPopup()"></span> |
         <button class = "action-button" id = "seen-button" onclick="addToSeen()">Seen</button>
@@ -564,11 +565,11 @@
     </div>
 
     <div id="reaction-popup">
-        <span class="emoji" onclick="selectEmoji('😍')">😍</span>
-        <span class="emoji" onclick="selectEmoji('😂')">😂</span>
-        <span class="emoji" onclick="selectEmoji('😎')">😎</span>
-        <span class="emoji" onclick="selectEmoji('👍')">👍</span>
-        <span class="emoji" onclick="selectEmoji('🙌')">🙌</span>
+        <span class="emoji" data-emoji-value="1" onclick="selectEmoji('😍')">😍</span>
+        <span class="emoji" data-emoji-value="2" onclick="selectEmoji('😂')">😂</span>
+        <span class="emoji" data-emoji-value="3" onclick="selectEmoji('😎')">😎</span>
+        <span class="emoji" data-emoji-value="4" onclick="selectEmoji('👍')">👍</span>
+        <span class="emoji" data-emoji-value="5" onclick="selectEmoji('🙌')">🙌</span>
         <button onclick="closeReactionPopup()">Close</button>
     </div>
     <script>
@@ -723,7 +724,6 @@
         }
 
         function selectEmoji(emoji) {
-            alert(`You selected the reaction: ${emoji}`); 
             const emojiValue = event.target.getAttribute('data-emoji-value');
             const queryString = window.location.search;
             const urlParams = new URLSearchParams(queryString);
@@ -734,6 +734,8 @@
                .then(response => response.json())
                .then(data => {
                   console.log(data.message);
+                  const reactedEmojiElement = document.getElementById('reacted-emoji');
+                  setEmoji(reactedEmojiElement, emojiValue);
                 })
                .catch(error => console.error('Error reacting to movie:', error));
             closeReactionPopup();
