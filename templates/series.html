@@ -573,6 +573,11 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Set the initial color of the buttons based on content_details.seen and content_details.must_watch
+            setInitialButtonColor('seen-button','{{ content_details.seen }}');
+            setInitialButtonColor('Must-button', '{{ content_details.must }}');
+        });
+        document.addEventListener('DOMContentLoaded', function () {
             // Assume content_details.reacted is available in the template
             const reactedEmojiValue = {{ content_details.reacted }};  // Adjust this based on your actual variable
             const reactedEmojiElement = document.getElementById('reacted-emoji');
@@ -745,8 +750,7 @@
                 .then(data => {
                     console.log(data.message);
                     if (data.message === 'Added to playlist') {
-                        // If the request is successful, add the 'clicked' class to the "Seen" button
-                        document.getElementById('seen-button').classList.add('clicked');
+                        toggleButtonColor('seen-button');
                     }
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
@@ -763,8 +767,7 @@
                 .then(data => {
                     console.log(data.message);
                     if (data.message === 'Added to playlist') {
-                        // If the request is successful, add the 'clicked' class to the "Must Watch" button
-                        document.getElementById('Must-button').classList.add('clicked');
+                        toggleButtonColor('Must-button');
                     }
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
@@ -790,6 +793,33 @@
 
         function createPlaylist(ID,type){
             window.location.href = '{% url "movies:create_playlist" %}' + `?id=${ID}&type=${type}`
+        }
+        function setInitialButtonColor(buttonId, isClicked) {
+            const buttonElement = document.getElementById(buttonId);
+    
+            // Set the initial color based on the 'isClicked' value
+            if (isClicked === 'True') { // Check if the value is a string 'True'
+                buttonElement.style.backgroundColor = '#4CAF50'; // Green color
+            } else {
+                buttonElement.style.backgroundColor = '#e50914'; // Red color
+            }
+            buttonElement.style.color = '#fff'; // White text color
+        }
+        function toggleButtonColor(buttonId) {
+            const buttonElement = document.getElementById(buttonId);
+        
+            // Toggle the 'clicked' class on the button
+            buttonElement.classList.toggle('clicked');
+        
+            // Check if the button now has the 'clicked' class
+            const isClicked = buttonElement.classList.contains('clicked');
+        
+            // Set the background color based on the 'clicked' class
+            if (isClicked) {
+                buttonElement.style.backgroundColor = '#4CAF50'; // Green color
+            } else {
+                buttonElement.style.backgroundColor = '#e50914'; // Red color
+            }
         }
     </script>
 </body>

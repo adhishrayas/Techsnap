@@ -108,6 +108,7 @@ class movie_details(APIView):
         response.raise_for_status() 
         content_details = response.json()
         movie,created = Movies.objects.get_or_create(content_id = content_id,content_type = content_type)
+        print(movie)
         if "budget" in content_details:
             movie.budget = content_details["budget"]
         if "original_language" in content_details:
@@ -152,6 +153,16 @@ class movie_details(APIView):
         dis_like_count = MoviesDisLikes.objects.filter(liked_on = movie).count()
         rating,created = Ratings.objects.get_or_create(rated_by = self.request.user,rated_on = movie)
         reaction,created = Reaction.objects.get_or_create(reacted_by = self.request.user,reacted_on = movie)
+        Seen = Playlists.objects.get(title = "Seen",owner = self.request.user)
+        Must = Playlists.objects.get(title = "Must Watch",owner = self.request.user)
+        if Seen.movies.filter(id = movie.id).exists():
+            content_details['seen'] = True
+        else:
+            content_details['seen'] = False
+        if Must.movies.filter(id = movie.id).exists():
+            content_details['must'] = True
+        else:
+            content_details['must'] = False
         content_details['likes'] = count
         content_details['dislikes'] = dis_like_count
         content_details['rated'] = rating.rating
@@ -170,11 +181,11 @@ class MovieLikeView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
-        content_id = self.request.query_params.get('id')
-        content_type = self.request.query_params.get('type')
+                content_id = self.request.query_params.get('id')
+                content_type = self.request.query_params.get('type')
 
-        try:
-            with transaction.atomic():
+        #try:
+           # with transaction.atomic():
                 movie, created = Movies.objects.get_or_create(
                     content_id=content_id, content_type=content_type
                 )
@@ -193,10 +204,10 @@ class MovieLikeView(APIView):
                     playlist.save()
                     MoviesLikes.objects.create(liked_on=movie, liked_by=self.request.user)
                     return Response({"Message": "Success"})
-        except Movies.DoesNotExist:
-            return Response({"Message": "Movie not found"}, status=404)
-        except Exception as e:
-            return Response({"Message": f"An error occurred: {str(e)}"}, status=500)
+       # except Movies.DoesNotExist:
+        #    return Response({"Message": "Movie not found"}, status=404)
+        #except Exception as e:
+         #   return Response({"Message": f"An error occurred: {str(e)}"}, status=500)
         
 class MovieDisLikeView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -415,8 +426,12 @@ class AddtoSeenPlaylistView(APIView):
         try:
             movie = Movies.objects.get(content_id=movie_id,content_type = type)
             playlist = Playlists.objects.get(title = "Seen",owner = self.request.user)
-            playlist.movies.add(movie)
-            playlist.save()
+            if playlist.movies.filter(id = movie.id).exists():
+              playlist.movies.remove(movie)
+              playlist.save()
+            else:
+              playlist.movies.add(movie)
+              playlist.save()
             return Response({"message": "Added to playlist"})
         except Movies.DoesNotExist:
             return Response({"message": "Movie not found"}, status=400)
@@ -432,8 +447,12 @@ class AddtoMustWatchPlaylistView(APIView):
         try:
             movie = Movies.objects.get(content_id=movie_id,content_type = type)
             playlist = Playlists.objects.get(title = "Must Watch",owner = self.request.user)
-            playlist.movies.add(movie)
-            playlist.save()
+            if playlist.movies.filter(id = movie.id).exists():
+              playlist.movies.remove(movie)
+              playlist.save()
+            else:
+              playlist.movies.add(movie)
+              playlist.save()
             return Response({"message": "Added to playlist"})
         except Movies.DoesNotExist:
             return Response({"message": "Movie not found"}, status=400)
@@ -604,28 +623,7 @@ class GetTrackedObjectsView(APIView):
             serializer = TrackerSerializer(t)
             data.append(serializer.data)
         return render(request,'tracker.html',{"data":data})
-''''
-class GetbyPersonView(APIView):
-    permission_classes = (IsAuthenticated,)
-    def get(self,request,*args, **kwargs):
-        query = self.request.query_params.get('query')
-        if query:
-            api_key = settings.API_KEY_TMDB
-            base_url = 'https://api.themoviedb.org/3'
-            search_person_url = f'{base_url}/search/person?api_key={api_key}&query={query}'
-            response = requests.get(search_person_url)
-            person_data = response.json()
-            #return Response({"data":person_data})
-            if person_data['results']:
-                person_id = person_data['results'][0]['id']
-                person_movie_credits_url = f'{base_url}/person/{person_id}/movie_credits?api_key={api_key}'
-                movie_credits_response = requests.get(person_movie_credits_url)
-                movie_credits_data = movie_credits_response.json()
-                movies = movie_credits_data.get('cast', []) + movie_credits_data.get('crew', [])
-                return Response({"movies":movies})
-                #return  render(request,'people_movies.html',{'movies': movies, 'person_name': query})
-        #return render(request, 'movies/search_form.html')
-'''
+
 class GetbyPersonView(APIView):
     permission_classes = (IsAuthenticated,)
 

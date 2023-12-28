@@ -315,34 +315,40 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
         var selectedRating = 0;
+        // Use jQuery for easier event handling
         $(document).ready(function () {
             $(".like-button").on("click", function (e) {
-                e.preventDefault();
-                const queryString = window.location.search;
-                const urlParams = new URLSearchParams(queryString);
-                const MovieId = urlParams.get('id');
-                const type = urlParams.get('type');
-                var likeUrl = "{% url 'movies:like_unlike_movie' %}?id=" + `${MovieId}` + `&type=${type}`;
+               e.preventDefault();
+        
+               const queryString = window.location.search;
+               const urlParams = new URLSearchParams(queryString);
+               const movieId = urlParams.get('id');
+               const type = urlParams.get('type');
+               const likeUrl = "{% url 'movies:like_unlike_movie' %}" + `?id=${movieId}&type=${type}`;
+       
 
+                // Make the AJAX request
                 $.ajax({
-                    url: likeUrl,
-                    method: "GET",
-                    success: function (data) {
-                        if (data && data.Message === "Success") {
-                            var likesElement = $("#likes-" + MovieId);
-                            $.get("{% url 'movies:get_likes' %}?id=" + `${MovieId}` +`&type=${type}`, function (countData) {
-                                likesElement.text("Likes: " + countData.Likes);
-                            });
-                        } else {
-                            console.error("Invalid response format or likes not successful.");
-                        }
-                    },
-                    error: function () {
-                        alert("Error occurred while processing the like.");
+                  url: likeUrl,
+                  method: "GET",
+                  success: function (data) {
+                    if (data && data.Message === "Success") {
+                    // Update the likes count on success
+                        var likesElement = $("#likes-" + movieId);
+                        $.get("{% url 'movies:get_likes' %}?id=" + `${movieId}`+ `&type=${type}`, function (countData) {
+                        likesElement.text("Likes: " + countData.Likes);
+                    });
+                    } else {
+                       console.error("Invalid response format or likes not successful.");
                     }
-                });
+                },
+                error: function () {
+                   alert("Error occurred while processing the like.");
+                }
             });
         });
+        });
+
         $(document).ready(function () {
             $(".dislike-button").on("click", function (e) {
                 e.preventDefault();
@@ -439,7 +445,7 @@
     <header>
         <h1>{{ content_details.title }} Details</h1>
         <button class = "action-button" id="playlist-button" onclick="showPlaylists()">Add To Playlist</button>
-        <a class="action-button" href="#" data-post-id="{{ content_details.id }}">Like</a>
+        <a class="action-button like-button" href="#" data-post-id="{{ content_details.id }}">Like</a>
         <span id="likes-{{ content_details.id }}" class="likes"><strong>Likes:</strong> {{ content_details.likes }}</span> |
         <button id="rate-button" onclick="showRatingStars()">Rate</button>
         <span id="rating-{{ content_details.id }}" class="rating"><strong>Rating:</strong> {{ content_details.rated}}</span> | 
@@ -563,6 +569,11 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set the initial color of the buttons based on content_details.seen and content_details.must_watch
+            setInitialButtonColor('seen-button','{{ content_details.seen }}');
+            setInitialButtonColor('Must-button', '{{ content_details.must }}');
+        });
         document.addEventListener('DOMContentLoaded', function () {
             // Assume content_details.reacted is available in the template
             const reactedEmojiValue = {{ content_details.reacted }};  // Adjust this based on your actual variable
@@ -712,8 +723,7 @@
                 .then(data => {
                     console.log(data.message);
                     if (data.message === 'Added to playlist') {
-                        // If the request is successful, add the 'clicked' class to the "Seen" button
-                        document.getElementById('seen-button').classList.add('clicked');
+                        toggleButtonColor('seen-button');
                     }
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
@@ -730,8 +740,7 @@
                 .then(data => {
                     console.log(data.message);
                     if (data.message === 'Added to playlist') {
-                        // If the request is successful, add the 'clicked' class to the "Must Watch" button
-                        document.getElementById('Must-button').classList.add('clicked');
+                        toggleButtonColor('Must-button');
                     }
                 })
                 .catch(error => console.error('Error adding to playlist:', error));
@@ -760,6 +769,34 @@
             const type = urlParams.get('type');
             window.location.href = '{% url "posts:movie_feed" %}' + `?content_id=${MovieId}` + `&content_type=${type}`;
         }
+        function setInitialButtonColor(buttonId, isClicked) {
+            const buttonElement = document.getElementById(buttonId);
+    
+            // Set the initial color based on the 'isClicked' value
+            if (isClicked === 'True') { // Check if the value is a string 'True'
+                buttonElement.style.backgroundColor = '#4CAF50'; // Green color
+            } else {
+                buttonElement.style.backgroundColor = '#e50914'; // Red color
+            }
+            buttonElement.style.color = '#fff'; // White text color
+        }
+        function toggleButtonColor(buttonId) {
+            const buttonElement = document.getElementById(buttonId);
+        
+            // Toggle the 'clicked' class on the button
+            buttonElement.classList.toggle('clicked');
+        
+            // Check if the button now has the 'clicked' class
+            const isClicked = buttonElement.classList.contains('clicked');
+        
+            // Set the background color based on the 'clicked' class
+            if (isClicked) {
+                buttonElement.style.backgroundColor = '#4CAF50'; // Green color
+            } else {
+                buttonElement.style.backgroundColor = '#e50914'; // Red color
+            }
+        }
+        
     </script>
 </body>
 
