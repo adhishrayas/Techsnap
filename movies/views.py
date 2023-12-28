@@ -163,7 +163,7 @@ class movie_details(APIView):
     except requests.exceptions.RequestException as e:
         # Handle API request errors, you might want to log the error or show an error page
         return Response({'error_message': f'Error fetching content details: {str(e)}'})
-    return Response({'content_details':content_details})
+    #return Response({'content_details':content_details})
     return render(request,'movie_details.html',{'content_details': content_details})
 
 class MovieLikeView(APIView):
