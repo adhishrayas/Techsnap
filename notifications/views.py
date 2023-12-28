@@ -55,6 +55,7 @@ class PostCreateView(CreateAPIView):
            post = serializer.instance
            if self.request.query_params.get('content_id') is None:
               post_data = PostSerializer(post).data
+              #return Response({'post':post_data})
               return render(request, 'post_created.html', {'post': post_data})
            else:
                content_id = self.request.query_params.get('content_id')
@@ -63,6 +64,7 @@ class PostCreateView(CreateAPIView):
                post.content_type = content_type
                post.save()
                post_data = PostSerializer(post).data
+               #return Response({'post':post_data})
                return render(request,'post_created.html',{'post':post_data})
         else:
             parent_id = self.request.query_params.get('id')
@@ -75,12 +77,14 @@ class PostCreateView(CreateAPIView):
             if parent.content_id == 0:
                 comment.save()
                 comment_data = PostSerializer(comment)
+                #return Response({'post':comment_data.data})
                 return render(request,'post_created.html',{'post':comment_data.data})
             else:
                 comment.content_id = parent.content_id
                 comment.content_type = parent.content_type
                 comment.save()
                 comment_data = PostSerializer(comment)
+                #return Response({'post':comment_data.data})
                 return render(request,'post_created.html',{'post':comment_data.data})
 
          

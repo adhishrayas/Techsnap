@@ -63,5 +63,47 @@
             <img src="{{ post.pic }}" alt="Post Image">
         {% endif %}
     </div>
+    <script>
+        function redirectAfterDelaytoPost(ppv) {
+            var redirectURL = '{% url "posts:Get_Comments" %}' + `?id=${ppv}`;
+            console.log(ppv);
+            setTimeout(function () {
+                window.location.href = redirectURL;
+            }, 1000); 
+        }
+    
+        function redirectAfterDelaytoPostFeed(ID, Type) {
+            var redirectURL = '{% url "posts:movie_feed" %}' + `?content_id=${ID}&content_type=${Type}`;
+            setTimeout(function () {
+                window.location.href = redirectURL;
+            }, 1000); 
+        }
+    
+        function redirectAfterDelaytoFeed() {
+            var redirectURL = '{% url "posts:Feed" %}';
+            setTimeout(function () {
+                window.location.href = redirectURL;
+            }, 1000); 
+        }
+    
+        window.onload = function () {
+            var parentPost = '{{ post.parent_post }}';
+            var contentId = '{{ post.content_id }}';
+            var contentType = '{{ post.content_type }}';
+    
+            console.log('parentPost:', parentPost);
+            console.log('contentId:', contentId);
+            console.log('contentType:', contentType);
+    
+            if (parentPost !== 'None' && parentPost !== null) {
+                redirectAfterDelaytoPost(parentPost);
+            } else if (contentId === '0' && contentType === 'None') {
+                redirectAfterDelaytoFeed();
+            } else {
+                redirectAfterDelaytoPostFeed(contentId, contentType);
+            }
+        };
+    </script>
+       
 </body>
 </html>

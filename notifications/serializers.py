@@ -8,7 +8,7 @@ class PostSerializer(ModelSerializer):
     comments = SerializerMethodField()
     class Meta:
         model = Notification
-        fields = ("id","user","content","timestamp","like","pic","parent_post","comments")
+        fields = ("id","user","content","timestamp","like","pic","parent_post","comments","content_id","content_type")
     
     def get_like(self,obj):
         return Likes.objects.filter(post_id = obj.id).count()
