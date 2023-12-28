@@ -281,6 +281,23 @@
         #Must-button.clicked:hover {
             background-color: #45a049; /* Darker green on hover */
         }
+
+        .create-playlist-button {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 50%;
+            background-color: #e50914; /* Red color */
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 0;
+            cursor: pointer;
+            z-index: 1001; /* Ensure the button appears above other elements */
+        }
+        .playlist-list-item.selected {
+            background-color: #e50914; /* Change the color to your desired highlight color */
+            color: #fff; /* Change the text color to contrast with the background */
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
@@ -590,10 +607,20 @@
         }
 
         function showPlaylistPopup(playlists) {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const MovieId = urlParams.get('id');
+            const type = urlParams.get('type');
             const popup = document.getElementById('playlistPopup');
             const PlayList = document.getElementById('play-list');
             PlayList.innerHTML = ''; // Clear previous content
-
+            const createPlaylistButton = document.createElement('button');
+            createPlaylistButton.textContent = 'Create Playlist';
+            createPlaylistButton.addEventListener('click', function () {
+                createPlaylist(MovieId,type)
+            });
+            createPlaylistButton.classList.add('create-playlist-button');
+            popup.insertBefore(createPlaylistButton, PlayList);
             playlists.data.forEach(playlist => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('playlist-list-item');
@@ -613,15 +640,20 @@
 
                 const MovieCount = document.createElement('p');
                 MovieCount.innerHTML = `<strong>Movies:</strong> ${playlist.movie_count}`;
-
-                const addButton = document.createElement('button');
-                addButton.textContent = '+ Add to this Playlist';
-                addButton.addEventListener('click', function (event) {
-                    addMovie(playlist.id, addButton);
+                listItem.addEventListener('click', function () {
+                    // Remove the 'selected' class from all playlist cards
+                    document.querySelectorAll('.playlist-list-item').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+        
+                    // Add the 'selected' class to the clicked playlist card
+                    listItem.classList.add('selected');
+        
+                    // Call the addMovie function with the playlist ID
+                    addMovie(playlist.id);
                 });
                 PlaylistCardContent.appendChild(PlayListTitle);
                 PlaylistCardContent.appendChild(MovieCount);
-                PlaylistCardContent.appendChild(addButton);
                 playlistCard.appendChild(PlaylistCover);
                 playlistCard.appendChild(PlaylistCardContent);
                 listItem.appendChild(playlistCard);
@@ -754,6 +786,10 @@
             const MovieId = urlParams.get('id');
             const type = urlParams.get('type');
             window.location.href = '{% url "posts:movie_feed" %}' + `?content_id=${MovieId}` + `&content_type=${type}`;
+        }
+
+        function createPlaylist(ID,type){
+            window.location.href = '{% url "movies:create_playlist" %}' + `?id=${ID}&type=${type}`
         }
     </script>
 </body>
