@@ -42,5 +42,14 @@
         <h2>Account Already Exists</h2>
         <p>An account with this email already exists. Please use a different email.</p>
     </div>
+    <script>
+        function redirectAfterDelay() {
+            var redirectURL = '{% url "Authmodules:signup" %}';  
+            setTimeout(function () {
+                window.location.href = redirectURL;
+            }, 1000); 
+        }
+        window.onload = redirectAfterDelay;
+    </script>
 </body>
 </html>
