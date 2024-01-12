@@ -58,8 +58,6 @@ class LoginView(GenericAPIView):
     permission_classes = (AllowAny,)
     queryset = CustomUser.objects.all()
 
-    def get(self, request, *args, **kwargs):
-        return render(request, 'login.html', {'email': '', 'password': ''})
     def post(self,request,*args, **kwargs):
         try:
             user = CustomUser.objects.get(email = request.data.get('email'))
