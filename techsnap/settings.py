@@ -26,9 +26,7 @@ SECRET_KEY = 'django-insecure-55b-47mkye==&lk-vk!o3&0zzz8!thrc9d@%i^=wrtr#b!4$6&
 DEBUG = True # Can't Load images when this is False, have to look into it
 
 ALLOWED_HOSTS = ['*']
-CORS_ALLOWED_ORIGINS = [
-    'https://techsnap-pe2v.onrender.com',
-]
+CORS_ORIGIN_ALLOW_ALL = True
 CSRF_TRUSTED_ORIGINS = ['https://techsnap-pe2v.onrender.com','https://www.chat.techsnap.in/']
 # Application definition
 
