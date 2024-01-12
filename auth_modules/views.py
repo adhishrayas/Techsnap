@@ -16,6 +16,7 @@ class SignUpView(GenericAPIView):
     serializer_class = SignUpSerializer
     permission_classes = (AllowAny,)
     queryset= CustomUser.objects.all()
+    """
     def get(self, request, *args, **kwargs):
         default_values = {
             "username": "",
@@ -23,7 +24,7 @@ class SignUpView(GenericAPIView):
             "phone": None,
         }
         return render(request, 'signup.html', default_values)
-    
+    """
     def post(self,request,*args, **kwargs):
         if CustomUser.objects.filter(email = request.data.get('email')).exists():
             return render(request, 'account_exists.html')
@@ -45,7 +46,11 @@ class SignUpView(GenericAPIView):
         login(request,user)
         token = Token.objects.get(user = user)
         user_data = SignUpSerializer(user)
-        return render(request, 'account_created.html',user_data.data)
+        return Response({
+            "token":token.key,
+            "data":user_data.data
+        }
+        )
     
 
 class LoginView(GenericAPIView):
@@ -67,9 +72,9 @@ class LoginView(GenericAPIView):
                     "token": token.key,
                     "user_data": user_data.data
                 }
-                #return Response({"data":payload})
+                return Response({"data":payload})
                 # Render the success template with the payload data
-                return render(request, 'loginsuccess.html', payload)
+              #  return render(request, 'loginsuccess.html', payload)
             else:
                 return render(request, 'incorrect_credentials.html')
         except:
