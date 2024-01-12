@@ -26,6 +26,7 @@ class SignUpView(GenericAPIView):
         return render(request, 'signup.html', default_values)
     """
     def post(self,request,*args, **kwargs):
+        print(request.data)
         if CustomUser.objects.filter(email = request.data.get('email')).exists():
             return render(request, 'account_exists.html')
         if CustomUser.objects.filter(username = request.data.get('username')).exists():
