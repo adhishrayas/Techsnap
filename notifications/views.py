@@ -23,7 +23,7 @@ class FeedView(ListAPIView):
     
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
-        return render(request, 'feed.html', {'results': response.data})
+        return response
     
 class MovieFeedView(APIView):
     permission_classes = (AllowAny,)
