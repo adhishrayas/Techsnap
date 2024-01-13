@@ -29,7 +29,15 @@ ALLOWED_HOSTS = ['*']
 CORS_ORIGIN_ALLOW_ALL = True
 CSRF_TRUSTED_ORIGINS = ['https://techsnap-pe2v.onrender.com','https://www.chat.techsnap.in/']
 # Application definition
-
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = (
+    'x-requested-with',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization',
+    'X-CSRFToken'
+)
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
