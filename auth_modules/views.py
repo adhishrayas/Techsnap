@@ -66,12 +66,11 @@ class LoginView(GenericAPIView):
                 token,_ = Token.objects.get_or_create(user = user)
                 login(request,user)
                 user_data = SignUpSerializer(user)
-                payload = {
+                return Response({
                     "message": "Logged in Successfully",
                     "token": token.key,
                     "user_data": user_data.data
-                }
-                return Response({"data":payload})
+                })
                 # Render the success template with the payload data
               #  return render(request, 'loginsuccess.html', payload)
             else:
