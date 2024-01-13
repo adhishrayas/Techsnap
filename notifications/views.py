@@ -122,16 +122,16 @@ class GetCommentsView(APIView):
         for comment in comments:
             serializer = PostSerializer(comment)
             serializer_data = serializer.data
+            serializer_data["replies"] = self.get_comments(comment)
             comment_data.append(serializer_data)
         return comment_data
 
     def get(self, request):
         parent_id = self.request.query_params.get('id')
         parent_post = Notification.objects.get(id=parent_id)
-        
-        comment_data = PostSerializer(parent_post).data
+        comment_data = {}
         comment_data["replies"] = self.get_comments(parent_post)
-        #return Response({"data":comment_data})
+        return Response({"data":comment_data})
         return render(request,'post_detail.html',{"data": comment_data})
 
 class GetCommentCount(APIView):
