@@ -16,7 +16,6 @@ class SignUpView(GenericAPIView):
     serializer_class = SignUpSerializer
     permission_classes = (AllowAny,)
     queryset= CustomUser.objects.all()
-    """
     def get(self, request, *args, **kwargs):
         default_values = {
             "username": "",
@@ -24,7 +23,7 @@ class SignUpView(GenericAPIView):
             "phone": None,
         }
         return render(request, 'signup.html', default_values)
-    """
+    
     def post(self,request,*args, **kwargs):
         print(request.data)
         if CustomUser.objects.filter(email = request.data.get('email')).exists():
