@@ -15,9 +15,8 @@ from django.conf import settings
 import requests
 
 def search_movies(request):
-    return render(request, 'search.html')
 
-def search_results(request):
+#def search_results(request):
     query = request.GET.get('query')
     api_key = settings.API_KEY_TMDB
     base_url_movies = 'https://api.themoviedb.org/3/search/movie'
