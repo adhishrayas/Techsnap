@@ -191,13 +191,13 @@ class movie_details(APIView):
         content_details['rated'] = rating.rating
         content_details['reacted'] = reaction.reaction
         if content_type == 'tv':
-            return Response({"data":content_details})
+           # return Response({"data":content_details})
             return render(request, 'series.html', {'content_details': content_details})
                     
     except requests.exceptions.RequestException as e:
         # Handle API request errors, you might want to log the error or show an error page
         return Response({'error_message': f'Error fetching content details: {str(e)}'})
-    return Response({'content_details':content_details})
+    #return Response({'content_details':content_details})
     return render(request,'movie_details.html',{'content_details': content_details})
 
 class MovieLikeView(APIView):
@@ -431,13 +431,13 @@ class GetYourPlayList(APIView):
         serializer =PlayListSerializer(playlist)
         for movie in serializer.data['movies']:
                 tracker = TrackObject.objects.get(content_id = movie['content_id'],owner = self.request.user)
-        #return Response({"data":serializer.data})
+        return Response({"data":serializer.data})
         return render(request,'playlist.html',{"data":serializer.data})
       else:
         user = self.request.user
         playlist = Playlists.objects.get(owner = user,title = type)
         serializer =PlayListSerializer(playlist)
-        #return Response({"data":serializer.data})
+        return Response({"data":serializer.data})
         return render(request,'playlist.html',{"data":serializer.data})
 
 

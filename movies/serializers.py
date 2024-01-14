@@ -9,7 +9,7 @@ class MovieSerializer(ModelSerializer):
     
     class Meta:
         model = Movies
-        fields = ("id","rating","rated_by","content_id","content_type","total_rating","movie_photo")
+        fields = ("id","rating","rated_by","content_id","content_type","total_rating","movie_photo","title")
         extra_kwargs = {"id":{"read_only":True}}
     
     def get_movie_photo(self,obj):
