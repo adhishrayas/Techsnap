@@ -126,7 +126,7 @@ class ProfilePageView(GenericAPIView):
         'is_owner': user == self_user,
     }
         print(user == self_user)#dont know how this made it work, but dont remove this line or it breaks
-        #return Response(context)
+        return Response(context)
         return render(request, 'my_profile.html',context)
     
 class FollowUnfollowView(APIView):
