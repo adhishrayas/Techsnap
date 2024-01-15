@@ -219,11 +219,11 @@ class MovieLikeView(APIView):
                     )
                     like.delete()
                     print("saved")
-                    playlist.movies.add(movie)
+                    playlist.movies.remove(movie)
                     playlist.save()
                     return Response({"Message": "Success"})
                 except MoviesLikes.DoesNotExist:
-                    playlist.movies.remove(movie)
+                    playlist.movies.add(movie)
                     playlist.save()
                     MoviesLikes.objects.create(liked_on=movie, liked_by=self.request.user)
                     return Response({"Message": "Success"})
