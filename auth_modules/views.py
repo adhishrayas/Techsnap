@@ -59,7 +59,7 @@ class LoginView(GenericAPIView):
     queryset = CustomUser.objects.all()
 
     def post(self,request,*args, **kwargs):
-        try:
+        #try:
             user = CustomUser.objects.get(email = request.data.get('email'))
             if user.password == request.data.get('password'):
                 token,_ = Token.objects.get_or_create(user = user)
@@ -74,8 +74,8 @@ class LoginView(GenericAPIView):
               #  return render(request, 'loginsuccess.html', payload)
             else:
                 return render(request, 'incorrect_credentials.html')
-        except:
-                return render(request, 'user_not_found.html')
+       # except:
+        #        return render(request, 'user_not_found.html')
 
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
