@@ -177,7 +177,8 @@ class search_users(APIView):
             for u in users:
                 serializer = BasicProfileSerializer(u)
                 data.append(serializer.data)
-            return render(request,'user_results.html',{"data":data})
+            #return render(request,'user_results.html',{"data":data})
+            return Response({"data":data})
         else:
             return Response({"data":""})
 
