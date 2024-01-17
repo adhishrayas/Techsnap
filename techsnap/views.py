@@ -6,4 +6,4 @@ def custom_404(request, exception):
 from django.shortcuts import redirect
 
 def redirect_to_specific_url(request):
-    return redirect('Authmodules:signup') 
+    return redirect('Authmodules:login') 

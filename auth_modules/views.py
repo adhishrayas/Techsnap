@@ -48,7 +48,6 @@ class SignUpView(GenericAPIView):
 class LoginView(GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = (AllowAny,)
-    queryset = CustomUser.objects.all()
 
     def post(self,request,*args, **kwargs):
         #try:

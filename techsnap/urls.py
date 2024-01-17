@@ -39,7 +39,7 @@ schema_view = get_schema_view(
 handler404 = 'techsnap.views.custom_404'
 urlpatterns = [
     path('admin/', admin.site.urls),
-     path('', redirect_to_specific_url,name = "Signup"),
+     path('', redirect_to_specific_url,name = "login"),
     path('accounts/',include('auth_modules.urls'),name = "Auth Module"),
     path('posts/',include('notifications.urls'),name='post'),
     path('movies/',include('movies.urls'),name = 'movies'),

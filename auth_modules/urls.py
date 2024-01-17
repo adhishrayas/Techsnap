@@ -11,13 +11,13 @@ from .views import (SignUpView,
                     settings_view,
                     FollowingNotificationView,
                     GetFollowersView,
-                    GetFollowingView)
+                    GetFollowingView,)
 
 
 app_name = 'Authmodules'
 urlpatterns = [
+    path('Login',LoginView.as_view(),name = "login"),
     path('signup',SignUpView.as_view(),name = "signup"),
-    path('login',LoginView.as_view(),name = "login"),
     path('profile',ProfilePageView.as_view(),name = 'profiles'),
     path('success',success_view, name='success-page'),
     path('logout',LogoutView.as_view(),name = "logout"),

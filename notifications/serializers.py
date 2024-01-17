@@ -1,5 +1,6 @@
-from rest_framework.serializers import ModelSerializer,SerializerMethodField,ValidationError,FileField
+from rest_framework.serializers import ModelSerializer,SerializerMethodField,ValidationError,FileField,CharField
 from auth_modules.serializers import BasicProfileSerializer
+from auth_modules.models import CustomUser
 from .models import Notification,Likes,Stories,ReportedBlogs
 
 class PostSerializer(ModelSerializer):
@@ -26,22 +27,20 @@ class LikesSerializer(ModelSerializer):
 
 class SeeStoriesSerializer(ModelSerializer):
     seen_by = SerializerMethodField()
-
+    username = SerializerMethodField()
     class Meta:
         model = Stories
-        fields = ("id","posted_by","created_at","media","caption","seen_by")
+        fields = ("id","posted_by","created_at","media","caption","seen_by","username")
     
     def get_seen_by(self,obj):
         seen_users = obj.seen_by.all()
-        return BasicProfileSerializer(seen_users,many = True).data
+        for s in self.instance:
+          if s.posted_by == self.context['request'].user:
+            return BasicProfileSerializer(seen_users,many = True).data
+        return {}
     
-    def to_representation(self, instance):
-        ret = super(SeeStoriesSerializer,self).to_representation(instance)
-        requesting_user = self.context['request'].user
-        if instance.posted_by == requesting_user:
-            ret['seen_by'] = self.get_seen_by(instance)
-        return ret
-    
+    def get_username(self,obj):
+       return obj.posted_by.username
 
 class MaxLengthValidator:
 
