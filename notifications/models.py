@@ -41,7 +41,7 @@ class Stories(models.Model):
     created_at = models.DateTimeField(auto_now_add = True)
     media = models.FileField(upload_to = 'stories/',null = True,blank = True)
     caption = models.TextField(null = True,blank = True)
-    seen_by = models.ManyToManyField(CustomUser,related_name='seen_by')
+    seen_by = models.ManyToManyField(CustomUser,related_name='seen_by',null = True,blank=True)
 
     def __str__(self):
         return self.posted_by.username
