@@ -29,7 +29,7 @@ class SeeStoriesSerializer(ModelSerializer):
 
     class Meta:
         model = Stories
-        fields = ("id","posted_by","created_at","media","caption")
+        fields = ("id","posted_by","created_at","media","caption","seen_by")
     
     def get_seen_by(self,obj):
         seen_users = obj.seen_by.all()
