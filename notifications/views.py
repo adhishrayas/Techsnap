@@ -8,8 +8,9 @@ from rest_framework.response import Response
 from auth_modules.models import CustomUser
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.pagination import PageNumberPagination
-from .serializers import PostSerializer,SeeStoriesSerializer,CreateStorySerializer,AddReportSerializer
+from .serializers import PostSerializer,SeeStoriesSerializer,CreateStorySerializer,AddReportSerializer,SeeIndividualStorySerializer
 from .models import Notification,Likes,Stories,ReportedBlogs
+from auth_modules.serializers import BasicProfileSerializer
 
 class PostPagination(PageNumberPagination):
     page_size = 10  
@@ -193,13 +194,16 @@ class CommentsNotifsView(APIView):
 
 class SeeStoryView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = SeeStoriesSerializer
+    serializer_class = SeeIndividualStorySerializer
     
     def get(self,request,story_id,*args, **kwargs):
         story = Stories.objects.get(id = story_id)
+        data = self.serializer_class(story).data
         if story.posted_by == self.request.user:
-            serializer = self.serializer_class(story)
-            return serializer.data
+            seen_by = BasicProfileSerializer(data = story.seen_by.all(),many = True)
+            seen_by.is_valid()
+            data["seen_by"] = seen_by.data
+            return Response({"data":data})
         story.seen_by.add(self.request.user)
         story.save()
         return Response({"data":self.serializer_class(story).data})

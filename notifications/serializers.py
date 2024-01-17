@@ -33,7 +33,7 @@ class SeeStoriesSerializer(ModelSerializer):
         fields = ("id","posted_by","created_at","media","caption","seen_by","username")
     
     def get_seen_by(self,obj):
-        seen_users = obj.seen_by.all()
+        seen_users = obj.seen_by
         for s in self.instance:
           if s.posted_by == self.context['request'].user:
             return BasicProfileSerializer(seen_users,many = True).data
@@ -64,3 +64,12 @@ class AddReportSerializer(ModelSerializer):
     class Meta:
         model = ReportedBlogs
         fields = ("report_sentence",)
+
+class SeeIndividualStorySerializer(ModelSerializer):
+    username = SerializerMethodField()
+    class Meta:
+        model = Stories
+        fields = ("id","posted_by","created_at","media","caption","username")
+
+    def get_username(self,obj):
+       return obj.posted_by.username
