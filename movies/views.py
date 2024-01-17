@@ -651,7 +651,8 @@ class GetTrackedObjectsView(APIView):
         for t in tracking_objects:
             serializer = TrackerSerializer(t)
             data.append(serializer.data)
-        return render(request,'tracker.html',{"data":data})
+        #return render(request,'tracker.html',{"data":data})
+        return Response({"data":data})
 
 class GetbyPersonView(APIView):
     permission_classes = (IsAuthenticated,)
