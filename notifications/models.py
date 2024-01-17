@@ -35,3 +35,20 @@ class Likes(models.Model):
     seen = models.BooleanField(default = False)
     def __str__(self):
         return str(self.liked_by)
+    
+class Stories(models.Model):
+    posted_by = models.ForeignKey(CustomUser,on_delete = models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add = True)
+    media = models.FileField(upload_to = 'stories/',null = True,blank = True)
+    caption = models.TextField(null = True,blank = True)
+    seen_by = models.ManyToManyField(CustomUser,related_name='seen_by')
+
+    def __str__(self):
+        return self.posted_by.username
+    
+class ReportedBlogs(models.Model):
+    report_sentence = models.TextField(default = "")
+    reported_by = models.ForeignKey(CustomUser,on_delete = models.DO_NOTHING)
+    reported_on  = models.ForeignKey(Notification,on_delete = models.CASCADE)
+    date = models.DateTimeField(auto_now_add = True)
+

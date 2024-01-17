@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.utils import timezone
 from rest_framework.generics import ListAPIView,CreateAPIView,GenericAPIView
 from rest_framework.views import APIView
 from rest_framework import status
@@ -7,8 +8,8 @@ from rest_framework.response import Response
 from auth_modules.models import CustomUser
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.pagination import PageNumberPagination
-from .serializers import PostSerializer
-from .models import Notification,Likes
+from .serializers import PostSerializer,SeeStoriesSerializer,CreateStorySerializer,AddReportSerializer
+from .models import Notification,Likes,Stories,ReportedBlogs
 
 class PostPagination(PageNumberPagination):
     page_size = 10  
@@ -189,3 +190,46 @@ class CommentsNotifsView(APIView):
                 obj['replied_at'] = r.timestamp
                 data.append(obj)
         return render(request,'comment_notifs.html',{"data":data})
+
+class SeeStoryView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SeeStoriesSerializer
+    
+    def get(self,request,story_id,*args, **kwargs):
+        story = Stories.objects.get(id = story_id)
+        if story.posted_by == self.request.user:
+            serializer = self.serializer_class(story)
+            return serializer.data
+        story.seen_by.add(self.request.user)
+        story.save()
+        return Response({"data":self.serializer_class(story).data})
+
+class GetAllStoriesView(GenericAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = SeeStoriesSerializer
+
+    def get(self,request,*args, **kwargs):
+        time_delta = timezone.now() - timezone.timedelta(hours = 24)
+        stories = Stories.objects.filter(created_at__gte = time_delta)
+        serializer = self.serializer_class(stories,many = True, context={'request': request})
+        return Response({"data":serializer.data})
+    
+class CreateStoryView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CreateStorySerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(posted_by=self.request.user)
+        return Response({"data":serializer.data})
+    
+class AddReportView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AddReportSerializer
+
+    def post(self,request,post_id,*args, **kwargs):
+        report_sentence = request.data.get('report_sentence')
+        post = Notification.objects.get(id = post_id)
+        ReportedBlogs.objects.create(report_sentence = report_sentence,reported_by = self.request.user,reported_on = post)
+        return Response({"message":"Success"})
+
