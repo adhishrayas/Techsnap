@@ -29,5 +29,6 @@ urlpatterns = [
     path('see_story/<int:story_id>/',SeeStoryView.as_view(),name = 'see_story'),
     path('get_stories',GetAllStoriesView.as_view(),name = 'get_stories'),
     path('create_story/',CreateStoryView.as_view(),name = 'create_story'),
-    path('add_report/<uuid:post_id>',AddReportView.as_view(),name = 'add_report')
+    path('add_report/<uuid:post_id>',AddReportView.as_view(),name = 'add_report'),
+    
 ]

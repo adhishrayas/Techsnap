@@ -233,3 +233,12 @@ class AddReportView(GenericAPIView):
         ReportedBlogs.objects.create(report_sentence = report_sentence,reported_by = self.request.user,reported_on = post)
         return Response({"message":"Success"})
 
+
+class GetMyStoriesView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SeeStoriesSerializer
+
+    def get(self,request,*args, **kwargs):
+        stories = Stories.objects.filter(posted_by = self.request.user)
+        serializer = self.serializer_class(stories,many = True)
+        return Response({"data":serializer.data})
