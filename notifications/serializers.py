@@ -38,12 +38,9 @@ class SeeStoriesSerializer(ModelSerializer):
     def to_representation(self, instance):
         ret = super(SeeStoriesSerializer,self).to_representation(instance)
         requesting_user = self.context['request'].user
-        if 'SeeStoryView' in str(self.context['view'].__class__):
-            if instance.posted_by == requesting_user:
-                ret['seen_by'] = self.get_seen_by(instance)
-            return ret
-        else:
-            return ret
+        if instance.posted_by == requesting_user:
+            ret['seen_by'] = self.get_seen_by(instance)
+        return ret
     
 
 class MaxLengthValidator:
