@@ -288,9 +288,6 @@ class CreatePlayListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PlayListSerializer
 
-    def get(self,request,*args, **kwargs):
-        return render(request,'create_playlist.html')
-    
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
         data['owner'] = request.user.id
