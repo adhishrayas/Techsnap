@@ -124,6 +124,9 @@ class CastObjects(models.Model):
     content = models.TextField(default = '')
     name = models.CharField(max_length = 255,blank = True,null = True)
 
+    def __str__(self):
+        return self.name
+
 class CrewObjects(models.Model):
     id = models.UUIDField(
         default = uuid.uuid4,
@@ -132,4 +135,7 @@ class CrewObjects(models.Model):
     )
     name = models.CharField(max_length = 255,blank = True,null = True)
     content = models.TextField(default = '')
+
+    def __str__(self):
+        return self.name
     
