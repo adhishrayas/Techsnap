@@ -200,7 +200,8 @@ class GetFollowersView(APIView):
         for f in followers:
             serializer = BasicProfileSerializer(f.user_id)
             data.append(serializer.data)
-        return render(request,'user_results.html',{'data':data})
+        return Response({"data":data})
+        #return render(request,'user_results.html',{'data':data})
     
 class GetFollowingView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -211,6 +212,7 @@ class GetFollowingView(APIView):
         for f in followers:
             serializer = BasicProfileSerializer(f.following_user_id)
             data.append(serializer.data)
+        return Response({"data":data})
         return render(request,'user_results.html',{'data':data})
     
 def settings_view(request):
