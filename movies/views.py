@@ -513,7 +513,7 @@ class TrendingMediaView(APIView):
                     for series in trending_series_data['results']
                 ]
                 trending_media = {'trending_movies': trending_movies, 'trending_series': trending_series}
-                return render(request,'trending.html',trending_media)
+               # return render(request,'trending.html',trending_media)
                 return Response(trending_media)
             else:
                 return Response({'error': 'Failed to fetch trending media'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -556,6 +556,7 @@ class UpcomingReleaseView(APIView):
                 for series in tv_data.get('results', [])
             ]
             results = {'movies': movies, 'tv_shows': tv_shows}
+            return Response(results)
             return render(request,'upcoming.html',results)
         except requests.exceptions.RequestException as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

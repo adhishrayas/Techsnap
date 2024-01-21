@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .permissions import IsAuthorOrReadOnly
 from .models import CustomUser,UserFollowing
-from movies.models import Playlists
+from movies.models import Playlists,CastObjects
 # Create your views here.
 
 class SignUpView(GenericAPIView):
